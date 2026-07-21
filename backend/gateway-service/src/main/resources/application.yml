@@ -1,0 +1,47 @@
+server:
+  port: 8092
+
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      routes:
+        - id: identity-route
+          uri: lb://identity-service
+          predicates:
+            - Path=/api/auth/**
+            - Path=/api/identity/**
+        - id: inventory-route
+          uri: lb://inventory-service
+          predicates:
+            - Path=/api/inventory/**
+        - id: order-route
+          uri: lb://order-service
+          predicates:
+            - Path=/api/orders/**
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            duplex: false
+
+  # --- ADDED SECURITY SECTION START ---
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          secret: my_super_secret_key_for_jwt_validation_1234567890
+  # --- ADDED SECURITY SECTION END ---
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/

@@ -1,0 +1,1 @@
+when given a task, if you coded java, make sure the code compiles by running "mvn.cmd compile"

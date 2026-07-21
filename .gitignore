@@ -1,0 +1,54 @@
+# --- Java / Maven ---
+target/
+*.class
+*.jar
+*.war
+*.ear
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+dependency-reduced-pom.xml
+build/
+
+# --- IDE ---
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.settings/
+.project
+.classpath
+*.prefs
+*.swp
+*~
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Frontend ---
+frontend/node_modules/
+frontend/build/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+frontend/.cache
+frontend/package-lock.json
+
+# --- Logs ---
+*.log
+hs_err_pid*.log
+heapdump*.hprof
+
+# --- Secrets (configs with passwords) ---
+application-local.yml
+application-local.properties
+*.secret
+
+# --- Misc ---
+*.bak
+*.orig
+*.tmp
+.apt_generated
