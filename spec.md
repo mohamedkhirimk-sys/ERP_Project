@@ -2,20 +2,20 @@
 
 ## 📍 CURRENT STATUS (AI Context)
 - **Current Phase:** Phase 1 (Infrastructure & Auth)
-- **Current Week:** Week 2 (Identity Service)
-- **Active Task:** [Update this manually as you progress, e.g., "Database Schema Design"]
-- **Next Milestone:** Complete JWT Authentication and RBAC.
+- **Current Week:** Week 3 (Security Integration)
+- **Active Task:** JWT Authentication and Global Security Filters
+- **Next Milestone:** Complete Global Security Integration.
 
 ---
 
 ## 🚀 PROJECT ROADMAP
 ### Phase 1: Infrastructure & Auth (The Backbone)
 - **Week 1: Core Infrastructure** (COMPLETED ✅)
-  - API Gateway, Eureka Server, Config Server setup.
-- **Week 2: Identity Service** (CURRENT 🎯)
+  - API Gateway, Eureka Server setup.
+- **Week 2: Identity Service** (COMPLETED ✅)
   - User Registration, Login, JWT Generation, RBAC (Roles).
-- **Week 3: Security Integration**
-  - Implementing Global Security Filters and Interceptors across all services.
+- **Week 3: Security Integration** (CURRENT 🎯)
+  - JWT Authentication, Global Security Filters and Interceptors across all services.
 
 ### Phase 2: Inventory Core (The Foundation)
 - **Week 4: Product & Catalog Management**

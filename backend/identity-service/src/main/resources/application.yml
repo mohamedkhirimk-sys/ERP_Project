@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/erp_db
-    username: postgres
-    password: md1962km
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/erp_db
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:md1962km}
     driver-classname: org.postgresql.Driver
   jpa:
     hibernate:
@@ -18,6 +18,7 @@ server:
 
 jwt:
   secret: c29tZS1zZWNyZXQta2V5LXdoaWNoLWlzLWp3dC1zdWl0YWJsZQ==
+  expiration-ms: 86400000
 
 logging:
   level:

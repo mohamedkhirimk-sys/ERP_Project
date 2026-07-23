@@ -1,0 +1,235 @@
+networks:
+  erp-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: erp-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-dbs.sql:/docker-entrypoint-initdb.d/init-dbs.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - erp-network
+
+  eureka-server:
+    build:
+      context: ./backend/eureka-server
+    container_name: erp-eureka
+    ports:
+      - "8761:8761"
+    environment:
+      EUREKA_HOST: eureka-server
+      EUREKA_PORT: 8761
+    networks:
+      - erp-network
+
+  identity-service:
+    build:
+      context: ./backend/identity-service
+    container_name: erp-identity
+    ports:
+      - "8086:8086"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      EUREKA_HOST: eureka-server
+      EUREKA_PORT: 8761
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - erp-network
+
+  product-service:
+    build:
+      context: ./backend/product-service
+    container_name: erp-product
+    ports:
+      - "8083:8083"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      EUREKA_HOST: eureka-server
+      EUREKA_PORT: 8761
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - erp-network
+
+  inventory-service:
+    build:
+      context: ./backend/inventory-service
+    container_name: erp-inventory
+    ports:
+      - "8091:8091"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      EUREKA_HOST: eureka-server
+      EUREKA_PORT: 8761
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - erp-network
+
+  order-service:
+    build:
+      context: ./backend/order-service
+    container_name: erp-order
+    ports:
+      - "8093:8093"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      EUREKA_HOST: eureka-server
+      EUREKA_PORT: 8761
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - erp-network
+
+  payment-service:
+    build:
+      context: ./backend/payment-service
+    container_name: erp-payment
+    ports:
+      - "8094:8094"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      EUREKA_HOST: eureka-server
+      EUREKA_PORT: 8761
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - erp-network
+
+  sales-service:
+    build:
+      context: ./backend/sales-service
+    container_name: erp-sales
+    ports:
+      - "8095:8095"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      EUREKA_HOST: eureka-server
+      EUREKA_PORT: 8761
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - erp-network
+
+  procurement-service:
+    build:
+      context: ./backend/procurement-service
+    container_name: erp-procurement
+    ports:
+      - "8096:8096"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      EUREKA_HOST: eureka-server
+      EUREKA_PORT: 8761
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - erp-network
+
+  hrm-service:
+    build:
+      context: ./backend/hrm-service
+    container_name: erp-hrm
+    ports:
+      - "8097:8097"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      EUREKA_HOST: eureka-server
+      EUREKA_PORT: 8761
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - erp-network
+
+  finance-service:
+    build:
+      context: ./backend/finance-service
+    container_name: erp-finance
+    ports:
+      - "8098:8098"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      EUREKA_HOST: eureka-server
+      EUREKA_PORT: 8761
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - erp-network
+
+  gateway-service:
+    build:
+      context: ./backend/gateway-service
+    container_name: erp-gateway
+    ports:
+      - "8092:8092"
+    environment:
+      EUREKA_HOST: eureka-server
+      EUREKA_PORT: 8761
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+    depends_on:
+      eureka-server:
+        condition: service_started
+    networks:
+      - erp-network

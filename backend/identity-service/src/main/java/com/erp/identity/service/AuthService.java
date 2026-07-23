@@ -5,6 +5,7 @@ import com.erp.identity.dto.RegistrationRequest;
 import com.erp.identity.entity.User;
 import com.erp.identity.mapper.UserMapper;
 import com.erp.identity.repository.UserRepository;
+import com.erp.identity.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final JwtUtil jwtUtil;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public String register(RegistrationRequest request) {
@@ -37,7 +39,6 @@ public class AuthService {
             throw new IllegalArgumentException("Invalid username or password");
         }
 
-        // In a real app, we would generate and return a JWT here
-        return "Login successful! (Mock Token: mock-jwt-token)";
+        return jwtUtil.generateToken(user.getUsername(), user.getRole().name());
     }
 }

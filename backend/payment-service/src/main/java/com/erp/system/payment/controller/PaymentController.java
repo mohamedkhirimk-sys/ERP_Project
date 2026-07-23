@@ -1,6 +1,7 @@
 package com.erp.system.payment.controller;
+
 import com.erp.system.payment.dto.PaymentRequest;
-import com.erp.system.payment.entity.PaymentEntity;
+import com.erp.system.payment.dto.PaymentResponse;
 import com.erp.system.payment.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +15,7 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @PostMapping
-    public ResponseEntity<PaymentEntity> processPayment(@RequestBody PaymentRequest request) {
+    public ResponseEntity<PaymentResponse> processPayment(@RequestBody PaymentRequest request) {
         return ResponseEntity.ok(paymentService.processPayment(request));
     }
 }

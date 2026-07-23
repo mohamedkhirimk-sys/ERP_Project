@@ -2,6 +2,7 @@ package com.erp.system.payment.service;
 
 import com.erp.common.event.PaymentCompletedEvent;
 import com.erp.system.payment.dto.PaymentRequest;
+import com.erp.system.payment.dto.PaymentResponse;
 import com.erp.system.payment.entity.PaymentEntity;
 import com.erp.system.payment.entity.PaymentStatus;
 import com.erp.system.payment.repository.PaymentRepository;
@@ -23,7 +24,7 @@ public class PaymentService {
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
-    public PaymentEntity processPayment(PaymentRequest request) {
+    public PaymentResponse processPayment(PaymentRequest request) {
         log.info("Processing payment for order: {}", request.getOrderId());
         validateRequest(request);
         String status = determinePaymentStatus(request);
@@ -43,7 +44,8 @@ public class PaymentService {
                     .build());
             log.info("Payment successful for order: {}", request.getOrderId());
         }
-        return paymentRepository.save(payment);
+        PaymentEntity saved = paymentRepository.save(payment);
+        return toResponse(saved);
     }
 
     private void validateRequest(PaymentRequest request) {
@@ -57,6 +59,18 @@ public class PaymentService {
 
     private String determinePaymentStatus(PaymentRequest request) {
         return "COMPLETED";
+    }
+
+    private PaymentResponse toResponse(PaymentEntity entity) {
+        return PaymentResponse.builder()
+                .id(entity.getId())
+                .orderId(entity.getOrderId())
+                .amount(entity.getAmount())
+                .status(entity.getStatus().name())
+                .paymentMethod(entity.getPaymentMethod())
+                .transactionId(entity.getTransactionId())
+                .createdAt(entity.getCreatedAt())
+                .build();
     }
 
     public void handleOrderStatusUpdate(String orderId, String status) {

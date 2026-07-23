@@ -2,6 +2,7 @@ package com.erp.system.payment.service;
 
 import com.erp.common.event.PaymentCompletedEvent;
 import com.erp.system.payment.dto.PaymentRequest;
+import com.erp.system.payment.dto.PaymentResponse;
 import com.erp.system.payment.entity.PaymentEntity;
 import com.erp.system.payment.exception.PaymentProcessingException;
 import com.erp.system.payment.repository.PaymentRepository;
@@ -55,7 +56,7 @@ public class PaymentServiceTest {
         when(paymentRepository.save(any(PaymentEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Act
-        PaymentEntity result = paymentService.processPayment(validRequest);
+        PaymentResponse result = paymentService.processPayment(validRequest);
 
         // Assert
         assertNotNull(result);

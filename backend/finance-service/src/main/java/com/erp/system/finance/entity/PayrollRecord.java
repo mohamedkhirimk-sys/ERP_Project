@@ -1,0 +1,52 @@
+package com.erp.system.finance.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "payroll_records")
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+public class PayrollRecord {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String employeeId;
+
+    @Column(nullable = false)
+    private String employeeName;
+
+    @Column(nullable = false)
+    private BigDecimal grossSalary;
+
+    private BigDecimal deductions;
+
+    @Builder.Default
+    private BigDecimal netSalary = BigDecimal.ZERO;
+
+    @Column(nullable = false)
+    private LocalDate payPeriodStart;
+
+    @Column(nullable = false)
+    private LocalDate payPeriodEnd;
+
+    private LocalDate paymentDate;
+
+    @Builder.Default
+    private String status = "PENDING";
+
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        if (netSalary == null || netSalary.compareTo(BigDecimal.ZERO) == 0) {
+            netSalary = grossSalary.subtract(deductions != null ? deductions : BigDecimal.ZERO);
+        }
+    }
+}

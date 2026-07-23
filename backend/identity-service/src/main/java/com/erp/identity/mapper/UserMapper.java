@@ -9,6 +9,8 @@ import org.mapstruct.*;
 public interface UserMapper {
 
     @Mapping(target = "password", ignore = true)
+    @Mapping(target = "email", source = "email")
+    @Mapping(target = "fullName", source = "fullName")
     @Mapping(target = "role", source = "role", qualifiedByName = "mapRole")
     User toEntity(RegistrationRequest dto);
 

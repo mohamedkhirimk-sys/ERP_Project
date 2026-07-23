@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: hrm-service
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/hrm_db
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:md1962km}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+server:
+  port: 8097
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://${EUREKA_HOST:localhost}:${EUREKA_PORT:8761}/eureka/

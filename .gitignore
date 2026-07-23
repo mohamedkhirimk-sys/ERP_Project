@@ -47,6 +47,9 @@ application-local.yml
 application-local.properties
 *.secret
 
+# --- Environment ---
+.env
+
 # --- Misc ---
 *.bak
 *.orig

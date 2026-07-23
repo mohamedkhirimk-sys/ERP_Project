@@ -1,13 +1,13 @@
 package com.erp.system.payment.service;
 
 import com.erp.system.payment.client.OrderClient;
+import com.erp.system.payment.client.OrderResponse;
 import com.erp.system.payment.dto.PaymentRequest;
 import com.erp.system.payment.dto.PaymentResponse;
 import com.erp.system.payment.entity.PaymentEntity;
 import com.erp.system.payment.entity.PaymentStatus;
 import com.erp.system.payment.repository.PaymentRepository;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -39,12 +39,12 @@ public class PaymentServiceIntegrationTest {
         request.setPaymentMethod("CREDIT_CARD");
 
         // Mock OrderClient to return a PENDING order
-        OrderClient.OrderResponse mockOrder = new OrderClient.OrderResponse();
+        OrderResponse mockOrder = new OrderResponse();
         mockOrder.setStatus("PENDING"); 
-        when(orderClient.getOrderById(anyString())).thenReturn(mockOrder);
+        when(orderClient.getOrderById(anyLong())).thenReturn(mockOrder);
 
         // 1. Process Payment
-        PaymentEntity response = paymentService.processPayment(request);
+        PaymentResponse response = paymentService.processPayment(request);
         assertNotNull(response);
         assertEquals("COMPLETED", response.getStatus());
 

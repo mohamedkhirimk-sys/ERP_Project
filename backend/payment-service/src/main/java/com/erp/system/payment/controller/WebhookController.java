@@ -1,4 +1,6 @@
 package com.erp.system.payment.controller;
+
+import com.erp.system.payment.dto.WebhookRequest;
 import com.erp.system.payment.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,4 @@ public class WebhookController {
         paymentService.handleOrderStatusUpdate(request.getOrderId(), request.getStatus());
         return ResponseEntity.ok("Webhook received");
     }
-
-
 }

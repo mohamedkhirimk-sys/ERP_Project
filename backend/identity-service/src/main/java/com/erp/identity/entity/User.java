@@ -20,6 +20,12 @@ public class User {
     private String username;
 
     @Column(nullable = false)
+    private String email;
+
+    @Column(name = "full_name", nullable = false)
+    private String fullName;
+
+    @Column(nullable = false)
     private String password;
 
     @Enumerated(EnumType.STRING)

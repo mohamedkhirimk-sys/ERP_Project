@@ -16,10 +16,41 @@ spring:
           uri: lb://inventory-service
           predicates:
             - Path=/api/inventory/**
+        - id: product-route
+          uri: lb://product-service
+          predicates:
+            - Path=/api/products/**
+        - id: payment-route
+          uri: lb://payment-service
+          predicates:
+            - Path=/api/payments/**
         - id: order-route
           uri: lb://order-service
           predicates:
             - Path=/api/orders/**
+        - id: sales-route
+          uri: lb://sales-service
+          predicates:
+            - Path=/api/customers/**
+            - Path=/api/invoices/**
+        - id: hrm-route
+          uri: lb://hrm-service
+          predicates:
+            - Path=/api/employees/**
+            - Path=/api/attendance/**
+            - Path=/api/leaves/**
+        - id: finance-route
+          uri: lb://finance-service
+          predicates:
+            - Path=/api/accounts/**
+            - Path=/api/journal-entries/**
+            - Path=/api/payroll/**
+        - id: procurement-route
+          uri: lb://procurement-service
+          predicates:
+            - Path=/api/vendors/**
+            - Path=/api/purchase-orders/**
+            - Path=/api/goods-received/**
       globalcors:
         cors-configurations:
           '[/**]':
@@ -33,15 +64,11 @@ spring:
             allowedHeaders: "*"
             duplex: false
 
-  # --- ADDED SECURITY SECTION START ---
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          secret: my_super_secret_key_for_jwt_validation_1234567890
-  # --- ADDED SECURITY SECTION END ---
+app:
+  jwt:
+    secret: c29tZS1zZWNyZXQta2V5LXdoaWNoLWlzLWp3dC1zdWl0YWJsZQ==
 
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://${EUREKA_HOST:localhost}:${EUREKA_PORT:8761}/eureka/
