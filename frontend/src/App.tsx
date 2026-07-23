@@ -12,7 +12,11 @@ import InvoiceListPage from '@/features/invoices/InvoiceListPage'
 import VendorListPage from '@/features/vendors/VendorListPage'
 import PurchaseOrderListPage from '@/features/purchase-orders/PurchaseOrderListPage'
 import EmployeeListPage from '@/features/employees/EmployeeListPage'
+import EmployeeFormPage from '@/features/employees/EmployeeFormPage'
 import AccountListPage from '@/features/accounts/AccountListPage'
+import AccountFormPage from '@/features/accounts/AccountFormPage'
+import CreateJournalEntryPage from '@/features/journal/CreateJournalEntryPage'
+import CreatePayrollPage from '@/features/payroll/CreatePayrollPage'
 import CreateOrderPage from '@/features/orders/CreateOrderPage'
 import CreateGrnPage from '@/features/goods-received/CreateGrnPage'
 import CreatePurchaseOrderPage from '@/features/purchase-orders/CreatePurchaseOrderPage'
@@ -42,9 +46,15 @@ export default function App() {
             <Route path="/purchase-orders" element={<PurchaseOrderListPage />} />
             <Route path="/purchase-orders/new" element={<CreatePurchaseOrderPage />} />
             <Route path="/employees" element={<EmployeeListPage />} />
+            <Route path="/employees/new" element={<EmployeeFormPage />} />
+            <Route path="/employees/:id/edit" element={<EmployeeFormPage />} />
             <Route path="/accounts" element={<AccountListPage />} />
+            <Route path="/accounts/new" element={<AccountFormPage />} />
+            <Route path="/accounts/:id/edit" element={<AccountFormPage />} />
             <Route path="/journal" element={<JournalEntryListPage />} />
+            <Route path="/journal/new" element={<CreateJournalEntryPage />} />
             <Route path="/payroll" element={<PayrollListPage />} />
+            <Route path="/payroll/new" element={<CreatePayrollPage />} />
           </Route>
         </Route>
       </Routes>

@@ -7,10 +7,13 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: identity-route
+        - id: identity-auth-route
           uri: lb://identity-service
           predicates:
             - Path=/api/auth/**
+        - id: identity-route
+          uri: lb://identity-service
+          predicates:
             - Path=/api/identity/**
         - id: inventory-route
           uri: lb://inventory-service
@@ -28,28 +31,49 @@ spring:
           uri: lb://order-service
           predicates:
             - Path=/api/orders/**
-        - id: sales-route
+        - id: sales-customers-route
           uri: lb://sales-service
           predicates:
             - Path=/api/customers/**
+        - id: sales-invoices-route
+          uri: lb://sales-service
+          predicates:
             - Path=/api/invoices/**
-        - id: hrm-route
+        - id: hrm-employees-route
           uri: lb://hrm-service
           predicates:
             - Path=/api/employees/**
+        - id: hrm-attendance-route
+          uri: lb://hrm-service
+          predicates:
             - Path=/api/attendance/**
+        - id: hrm-leaves-route
+          uri: lb://hrm-service
+          predicates:
             - Path=/api/leaves/**
-        - id: finance-route
+        - id: finance-accounts-route
           uri: lb://finance-service
           predicates:
             - Path=/api/accounts/**
+        - id: finance-journal-route
+          uri: lb://finance-service
+          predicates:
             - Path=/api/journal-entries/**
+        - id: finance-payroll-route
+          uri: lb://finance-service
+          predicates:
             - Path=/api/payroll/**
-        - id: procurement-route
+        - id: procurement-vendors-route
           uri: lb://procurement-service
           predicates:
             - Path=/api/vendors/**
+        - id: procurement-purchase-orders-route
+          uri: lb://procurement-service
+          predicates:
             - Path=/api/purchase-orders/**
+        - id: procurement-goods-received-route
+          uri: lb://procurement-service
+          predicates:
             - Path=/api/goods-received/**
       globalcors:
         cors-configurations:
