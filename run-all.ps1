@@ -18,8 +18,11 @@ $services = @(
     # Tier 4: HR & Finance
     @{ Name = "hrm-service"; Port = 8097 },
     @{ Name = "finance-service"; Port = 8098 },
-    
-    # Tier 5: Gateway (last, routes to all)
+
+    # Tier 5: Reporting (aggregates from all services)
+    @{ Name = "reporting-service"; Port = 8099 },
+
+    # Tier 6: Gateway (last, routes to all)
     @{ Name = "gateway-service"; Port = 8092 }
 )
 

@@ -8,6 +8,6 @@ FROM eclipse-temurin:21-jre-alpine
 RUN addgroup -g 1001 appgroup && adduser -u 1001 -G appgroup -s /bin/sh -D appuser
 WORKDIR /app
 COPY --from=builder --chown=appuser:appgroup /app/target/*.jar app.jar
-EXPOSE 8082
+EXPOSE 8099
 USER appuser
 ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75", "-XX:+ExitOnOutOfMemoryError", "-jar", "app.jar"]

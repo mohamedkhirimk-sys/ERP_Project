@@ -23,6 +23,12 @@ import CreatePurchaseOrderPage from '@/features/purchase-orders/CreatePurchaseOr
 import CreateInvoicePage from '@/features/invoices/CreateInvoicePage'
 import PayrollListPage from '@/features/payroll/PayrollListPage'
 import JournalEntryListPage from '@/features/journal/JournalEntryListPage'
+import ReportsListPage from '@/features/reports/ReportsListPage'
+import SalesReportPage from '@/features/reports/SalesReportPage'
+import InventoryReportPage from '@/features/reports/InventoryReportPage'
+import FinancialReportPage from '@/features/reports/FinancialReportPage'
+import HrReportPage from '@/features/reports/HrReportPage'
+import ProcurementReportPage from '@/features/reports/ProcurementReportPage'
 
 export default function App() {
   return (
@@ -55,6 +61,12 @@ export default function App() {
             <Route path="/journal/new" element={<CreateJournalEntryPage />} />
             <Route path="/payroll" element={<PayrollListPage />} />
             <Route path="/payroll/new" element={<CreatePayrollPage />} />
+            <Route path="/reports" element={<ReportsListPage />} />
+            <Route path="/reports/sales" element={<SalesReportPage />} />
+            <Route path="/reports/inventory" element={<InventoryReportPage />} />
+            <Route path="/reports/financial" element={<FinancialReportPage />} />
+            <Route path="/reports/hr" element={<HrReportPage />} />
+            <Route path="/reports/procurement" element={<ProcurementReportPage />} />
           </Route>
         </Route>
       </Routes>

@@ -1,5 +1,5 @@
 server:
-  port: 8092
+  port: 8082
 
 spring:
   application:
@@ -75,18 +75,11 @@ spring:
           uri: lb://procurement-service
           predicates:
             - Path=/api/goods-received/**
-      globalcors:
-        cors-configurations:
-          '[/**]':
-            allowedOrigins: "*"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - OPTIONS
-            allowedHeaders: "*"
-            duplex: false
+        - id: reporting-route
+          uri: lb://reporting-service
+          predicates:
+            - Path=/api/reports/**
+
 
 app:
   jwt:
