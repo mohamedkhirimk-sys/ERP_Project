@@ -5,12 +5,13 @@ import com.erp.system.procurement.dto.GoodsReceivedNoteResponse;
 import com.erp.system.procurement.service.GoodsReceivedNoteService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/goods-received")
@@ -27,8 +28,9 @@ public class GoodsReceivedNoteController {
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<GoodsReceivedNoteResponse>> getAllGoodsReceivedNotes() {
-        return ResponseEntity.ok(grnService.getAllGoodsReceivedNotes());
+    public ResponseEntity<Page<GoodsReceivedNoteResponse>> getAllGoodsReceivedNotes(
+            @PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(grnService.getAllGoodsReceivedNotes(pageable));
     }
 
     @GetMapping("/{id}")
@@ -39,7 +41,9 @@ public class GoodsReceivedNoteController {
 
     @GetMapping("/purchase-order/{purchaseOrderId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<GoodsReceivedNoteResponse>> getNotesByPurchaseOrder(@PathVariable Long purchaseOrderId) {
-        return ResponseEntity.ok(grnService.getNotesByPurchaseOrder(purchaseOrderId));
+    public ResponseEntity<Page<GoodsReceivedNoteResponse>> getNotesByPurchaseOrder(
+            @PathVariable Long purchaseOrderId,
+            @PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(grnService.getNotesByPurchaseOrder(purchaseOrderId, pageable));
     }
 }

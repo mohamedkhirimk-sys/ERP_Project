@@ -6,6 +6,8 @@ import com.erp.system.hrm.entity.Employee;
 import com.erp.system.hrm.repository.EmployeeRepository;
 import com.erp.system.hrm.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -41,8 +43,8 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public List<EmployeeResponse> getAllEmployees() {
-        return employeeRepository.findAll().stream().map(this::toResponse).toList();
+    public Page<EmployeeResponse> getAllEmployees(Pageable pageable) {
+        return employeeRepository.findAll(pageable).map(this::toResponse);
     }
 
     @Override

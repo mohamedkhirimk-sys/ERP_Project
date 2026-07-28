@@ -5,11 +5,13 @@ import com.erp.system.hrm.dto.LeaveResponse;
 import com.erp.system.hrm.service.LeaveService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/leaves")
@@ -26,14 +28,14 @@ public class LeaveController {
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<LeaveResponse>> getAllLeaves() {
-        return ResponseEntity.ok(leaveService.getAllLeaves());
+    public ResponseEntity<Page<LeaveResponse>> getAllLeaves(@PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(leaveService.getAllLeaves(pageable));
     }
 
     @GetMapping("/employee/{employeeId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<LeaveResponse>> getLeavesByEmployee(@PathVariable Long employeeId) {
-        return ResponseEntity.ok(leaveService.getLeavesByEmployee(employeeId));
+    public ResponseEntity<Page<LeaveResponse>> getLeavesByEmployee(@PathVariable Long employeeId, @PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(leaveService.getLeavesByEmployee(employeeId, pageable));
     }
 
     @PatchMapping("/{id}/status")

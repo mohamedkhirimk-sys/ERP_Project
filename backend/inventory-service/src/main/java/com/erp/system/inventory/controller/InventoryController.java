@@ -4,12 +4,13 @@ import com.erp.system.inventory.dto.StockRequest;
 import com.erp.system.inventory.entity.Stock;
 import com.erp.system.inventory.service.InventoryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/inventory")
@@ -38,7 +39,8 @@ public class InventoryController {
 
     @GetMapping("/stocks")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<Stock>> getAllStocks() {
-        return ResponseEntity.ok(inventoryService.getAllStocks());
+    public ResponseEntity<Page<Stock>> getAllStocks(
+            @PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(inventoryService.getAllStocks(pageable));
     }
 }

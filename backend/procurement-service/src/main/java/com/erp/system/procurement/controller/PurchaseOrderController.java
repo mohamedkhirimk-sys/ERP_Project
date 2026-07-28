@@ -5,12 +5,13 @@ import com.erp.system.procurement.dto.PurchaseOrderResponse;
 import com.erp.system.procurement.service.PurchaseOrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/purchase-orders")
@@ -27,8 +28,9 @@ public class PurchaseOrderController {
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<PurchaseOrderResponse>> getAllPurchaseOrders() {
-        return ResponseEntity.ok(purchaseOrderService.getAllPurchaseOrders());
+    public ResponseEntity<Page<PurchaseOrderResponse>> getAllPurchaseOrders(
+            @PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(purchaseOrderService.getAllPurchaseOrders(pageable));
     }
 
     @GetMapping("/{id}")
@@ -39,8 +41,10 @@ public class PurchaseOrderController {
 
     @GetMapping("/vendor/{vendorId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<PurchaseOrderResponse>> getPurchaseOrdersByVendor(@PathVariable Long vendorId) {
-        return ResponseEntity.ok(purchaseOrderService.getPurchaseOrdersByVendor(vendorId));
+    public ResponseEntity<Page<PurchaseOrderResponse>> getPurchaseOrdersByVendor(
+            @PathVariable Long vendorId,
+            @PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(purchaseOrderService.getPurchaseOrdersByVendor(vendorId, pageable));
     }
 
     @PatchMapping("/{id}/status")

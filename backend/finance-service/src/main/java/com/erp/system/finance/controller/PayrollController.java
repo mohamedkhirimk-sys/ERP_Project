@@ -5,11 +5,13 @@ import com.erp.system.finance.dto.PayrollResponse;
 import com.erp.system.finance.service.PayrollService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/payroll")
@@ -26,14 +28,17 @@ public class PayrollController {
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<PayrollResponse>> getAllPayrolls() {
-        return ResponseEntity.ok(payrollService.getAllPayrolls());
+    public ResponseEntity<Page<PayrollResponse>> getAllPayrolls(
+            @PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(payrollService.getAllPayrolls(pageable));
     }
 
     @GetMapping("/employee/{employeeId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<PayrollResponse>> getPayrollsByEmployee(@PathVariable String employeeId) {
-        return ResponseEntity.ok(payrollService.getPayrollsByEmployee(employeeId));
+    public ResponseEntity<Page<PayrollResponse>> getPayrollsByEmployee(
+            @PathVariable String employeeId,
+            @PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(payrollService.getPayrollsByEmployee(employeeId, pageable));
     }
 
     @PatchMapping("/{id}/pay")

@@ -6,10 +6,11 @@ import com.erp.system.finance.entity.PayrollRecord;
 import com.erp.system.finance.repository.PayrollRepository;
 import com.erp.system.finance.service.PayrollService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -33,13 +34,13 @@ public class PayrollServiceImpl implements PayrollService {
     }
 
     @Override
-    public List<PayrollResponse> getAllPayrolls() {
-        return payrollRepository.findAll().stream().map(this::toResponse).toList();
+    public Page<PayrollResponse> getAllPayrolls(Pageable pageable) {
+        return payrollRepository.findAll(pageable).map(this::toResponse);
     }
 
     @Override
-    public List<PayrollResponse> getPayrollsByEmployee(String employeeId) {
-        return payrollRepository.findByEmployeeId(employeeId).stream().map(this::toResponse).toList();
+    public Page<PayrollResponse> getPayrollsByEmployee(String employeeId, Pageable pageable) {
+        return payrollRepository.findByEmployeeId(employeeId, pageable).map(this::toResponse);
     }
 
     @Override

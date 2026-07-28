@@ -8,6 +8,8 @@ import com.erp.system.hrm.repository.AttendanceRepository;
 import com.erp.system.hrm.repository.EmployeeRepository;
 import com.erp.system.hrm.service.AttendanceService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -33,13 +35,13 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
-    public List<AttendanceResponse> getAttendanceByEmployee(Long employeeId) {
-        return attendanceRepository.findByEmployeeId(employeeId).stream().map(this::toResponse).toList();
+    public Page<AttendanceResponse> getAttendanceByEmployee(Long employeeId, Pageable pageable) {
+        return attendanceRepository.findByEmployeeId(employeeId, pageable).map(this::toResponse);
     }
 
     @Override
-    public List<AttendanceResponse> getAllAttendance() {
-        return attendanceRepository.findAll().stream().map(this::toResponse).toList();
+    public Page<AttendanceResponse> getAllAttendance(Pageable pageable) {
+        return attendanceRepository.findAll(pageable).map(this::toResponse);
     }
 
     private AttendanceResponse toResponse(Attendance a) {

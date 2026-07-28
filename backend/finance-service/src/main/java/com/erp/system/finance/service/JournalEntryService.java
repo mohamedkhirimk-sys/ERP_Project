@@ -2,10 +2,11 @@ package com.erp.system.finance.service;
 
 import com.erp.system.finance.dto.JournalEntryRequest;
 import com.erp.system.finance.dto.JournalEntryResponse;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface JournalEntryService {
     JournalEntryResponse createEntry(JournalEntryRequest request);
-    List<JournalEntryResponse> getAllEntries();
-    List<JournalEntryResponse> getEntriesByAccount(Long accountId);
+    Page<JournalEntryResponse> getAllEntries(Pageable pageable);
+    Page<JournalEntryResponse> getEntriesByAccount(Long accountId, Pageable pageable);
 }

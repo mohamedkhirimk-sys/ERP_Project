@@ -5,8 +5,9 @@ import com.erp.system.inventory.entity.Stock;
 import com.erp.system.inventory.repository.StockRepository;
 import com.erp.system.inventory.service.InventoryService;
 import lombok.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -50,7 +51,7 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     @Override
-    public List<Stock> getAllStocks() {
-        return stockRepository.findAll();
+    public Page<Stock> getAllStocks(Pageable pageable) {
+        return stockRepository.findAll(pageable);
     }
 }

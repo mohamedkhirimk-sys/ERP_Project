@@ -8,6 +8,8 @@ import com.erp.system.order.entity.OrderItem;
 import com.erp.system.order.repository.OrderRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -52,10 +54,9 @@ public class OrderService {
         return toResponse(saved);
     }
 
-    public List<OrderResponse> getAllOrders() {
-        return orderRepository.findAll().stream()
-                .map(this::toResponse)
-                .toList();
+    public Page<OrderResponse> getAllOrders(Pageable pageable) {
+        return orderRepository.findAll(pageable)
+                .map(this::toResponse);
     }
 
     private OrderResponse toResponse(OrderEntity entity) {

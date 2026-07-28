@@ -8,9 +8,9 @@ import com.erp.system.procurement.repository.PurchaseOrderRepository;
 import com.erp.system.procurement.repository.VendorRepository;
 import com.erp.system.procurement.service.PurchaseOrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -43,17 +43,15 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     }
 
     @Override
-    public List<PurchaseOrderResponse> getPurchaseOrdersByVendor(Long vendorId) {
-        return purchaseOrderRepository.findByVendorId(vendorId).stream()
-                .map(this::toResponse)
-                .toList();
+    public Page<PurchaseOrderResponse> getPurchaseOrdersByVendor(Long vendorId, Pageable pageable) {
+        return purchaseOrderRepository.findByVendorId(vendorId, pageable)
+                .map(this::toResponse);
     }
 
     @Override
-    public List<PurchaseOrderResponse> getAllPurchaseOrders() {
-        return purchaseOrderRepository.findAll().stream()
-                .map(this::toResponse)
-                .toList();
+    public Page<PurchaseOrderResponse> getAllPurchaseOrders(Pageable pageable) {
+        return purchaseOrderRepository.findAll(pageable)
+                .map(this::toResponse);
     }
 
     @Override

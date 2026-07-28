@@ -5,12 +5,13 @@ import com.erp.system.sales.dto.InvoiceResponse;
 import com.erp.system.sales.service.InvoiceService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/invoices")
@@ -27,8 +28,9 @@ public class InvoiceController {
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<InvoiceResponse>> getAllInvoices() {
-        return ResponseEntity.ok(invoiceService.getAllInvoices());
+    public ResponseEntity<Page<InvoiceResponse>> getAllInvoices(
+            @PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(invoiceService.getAllInvoices(pageable));
     }
 
     @GetMapping("/{id}")
@@ -39,8 +41,10 @@ public class InvoiceController {
 
     @GetMapping("/customer/{customerId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<InvoiceResponse>> getInvoicesByCustomer(@PathVariable Long customerId) {
-        return ResponseEntity.ok(invoiceService.getInvoicesByCustomer(customerId));
+    public ResponseEntity<Page<InvoiceResponse>> getInvoicesByCustomer(
+            @PathVariable Long customerId,
+            @PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(invoiceService.getInvoicesByCustomer(customerId, pageable));
     }
 
     @PatchMapping("/{id}/status")

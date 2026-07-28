@@ -6,8 +6,9 @@ import com.erp.system.finance.entity.Account;
 import com.erp.system.finance.repository.AccountRepository;
 import com.erp.system.finance.service.AccountService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -36,8 +37,8 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public List<AccountResponse> getAllAccounts() {
-        return accountRepository.findAll().stream().map(this::toResponse).toList();
+    public Page<AccountResponse> getAllAccounts(Pageable pageable) {
+        return accountRepository.findAll(pageable).map(this::toResponse);
     }
 
     @Override

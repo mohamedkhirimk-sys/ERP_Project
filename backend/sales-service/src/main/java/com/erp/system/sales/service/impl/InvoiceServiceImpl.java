@@ -10,9 +10,9 @@ import com.erp.system.sales.repository.InvoiceRepository;
 import com.erp.system.sales.service.InvoiceService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -51,17 +51,15 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
-    public List<InvoiceResponse> getInvoicesByCustomer(Long customerId) {
-        return invoiceRepository.findByCustomerId(customerId).stream()
-                .map(this::toResponse)
-                .toList();
+    public Page<InvoiceResponse> getInvoicesByCustomer(Long customerId, Pageable pageable) {
+        return invoiceRepository.findByCustomerId(customerId, pageable)
+                .map(this::toResponse);
     }
 
     @Override
-    public List<InvoiceResponse> getAllInvoices() {
-        return invoiceRepository.findAll().stream()
-                .map(this::toResponse)
-                .toList();
+    public Page<InvoiceResponse> getAllInvoices(Pageable pageable) {
+        return invoiceRepository.findAll(pageable)
+                .map(this::toResponse);
     }
 
     @Override

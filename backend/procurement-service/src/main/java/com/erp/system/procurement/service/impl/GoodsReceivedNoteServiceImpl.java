@@ -10,9 +10,9 @@ import com.erp.system.procurement.repository.PurchaseOrderRepository;
 import com.erp.system.procurement.service.GoodsReceivedNoteService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -49,17 +49,15 @@ public class GoodsReceivedNoteServiceImpl implements GoodsReceivedNoteService {
     }
 
     @Override
-    public List<GoodsReceivedNoteResponse> getNotesByPurchaseOrder(Long purchaseOrderId) {
-        return grnRepository.findByPurchaseOrderId(purchaseOrderId).stream()
-                .map(this::toResponse)
-                .toList();
+    public Page<GoodsReceivedNoteResponse> getNotesByPurchaseOrder(Long purchaseOrderId, Pageable pageable) {
+        return grnRepository.findByPurchaseOrderId(purchaseOrderId, pageable)
+                .map(this::toResponse);
     }
 
     @Override
-    public List<GoodsReceivedNoteResponse> getAllGoodsReceivedNotes() {
-        return grnRepository.findAll().stream()
-                .map(this::toResponse)
-                .toList();
+    public Page<GoodsReceivedNoteResponse> getAllGoodsReceivedNotes(Pageable pageable) {
+        return grnRepository.findAll(pageable)
+                .map(this::toResponse);
     }
 
     private GoodsReceivedNoteResponse toResponse(GoodsReceivedNote grn) {

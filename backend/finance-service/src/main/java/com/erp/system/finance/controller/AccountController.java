@@ -5,11 +5,13 @@ import com.erp.system.finance.dto.AccountResponse;
 import com.erp.system.finance.service.AccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/accounts")
@@ -26,8 +28,9 @@ public class AccountController {
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<AccountResponse>> getAllAccounts() {
-        return ResponseEntity.ok(accountService.getAllAccounts());
+    public ResponseEntity<Page<AccountResponse>> getAllAccounts(
+            @PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(accountService.getAllAccounts(pageable));
     }
 
     @GetMapping("/{id}")

@@ -1,6 +1,8 @@
 package com.erp.system.procurement.repository;
 
 import com.erp.system.procurement.entity.PurchaseOrder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.List;
@@ -8,4 +10,6 @@ import java.util.List;
 @Repository
 public interface PurchaseOrderRepository extends JpaRepository<PurchaseOrder, Long> {
     List<PurchaseOrder> findByVendorId(Long vendorId);
+
+    Page<PurchaseOrder> findByVendorId(Long vendorId, Pageable pageable);
 }

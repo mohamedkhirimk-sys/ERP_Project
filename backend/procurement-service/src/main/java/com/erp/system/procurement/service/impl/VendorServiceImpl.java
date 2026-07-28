@@ -5,9 +5,9 @@ import com.erp.system.procurement.entity.Vendor;
 import com.erp.system.procurement.repository.VendorRepository;
 import com.erp.system.procurement.service.VendorService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -36,8 +36,8 @@ public class VendorServiceImpl implements VendorService {
     }
 
     @Override
-    public List<Vendor> getAllVendors() {
-        return vendorRepository.findAll();
+    public Page<Vendor> getAllVendors(Pageable pageable) {
+        return vendorRepository.findAll(pageable);
     }
 
     @Override

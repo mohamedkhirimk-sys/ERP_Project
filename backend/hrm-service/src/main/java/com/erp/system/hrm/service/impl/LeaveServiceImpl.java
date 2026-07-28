@@ -8,6 +8,8 @@ import com.erp.system.hrm.repository.EmployeeRepository;
 import com.erp.system.hrm.repository.LeaveRepository;
 import com.erp.system.hrm.service.LeaveService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -33,13 +35,13 @@ public class LeaveServiceImpl implements LeaveService {
     }
 
     @Override
-    public List<LeaveResponse> getLeavesByEmployee(Long employeeId) {
-        return leaveRepository.findByEmployeeId(employeeId).stream().map(this::toResponse).toList();
+    public Page<LeaveResponse> getLeavesByEmployee(Long employeeId, Pageable pageable) {
+        return leaveRepository.findByEmployeeId(employeeId, pageable).map(this::toResponse);
     }
 
     @Override
-    public List<LeaveResponse> getAllLeaves() {
-        return leaveRepository.findAll().stream().map(this::toResponse).toList();
+    public Page<LeaveResponse> getAllLeaves(Pageable pageable) {
+        return leaveRepository.findAll(pageable).map(this::toResponse);
     }
 
     @Override

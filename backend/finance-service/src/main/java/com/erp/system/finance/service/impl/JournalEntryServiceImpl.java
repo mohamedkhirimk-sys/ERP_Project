@@ -9,9 +9,10 @@ import com.erp.system.finance.repository.JournalEntryRepository;
 import com.erp.system.finance.service.JournalEntryService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -40,13 +41,13 @@ public class JournalEntryServiceImpl implements JournalEntryService {
     }
 
     @Override
-    public List<JournalEntryResponse> getAllEntries() {
-        return journalEntryRepository.findAll().stream().map(this::toResponse).toList();
+    public Page<JournalEntryResponse> getAllEntries(Pageable pageable) {
+        return journalEntryRepository.findAll(pageable).map(this::toResponse);
     }
 
     @Override
-    public List<JournalEntryResponse> getEntriesByAccount(Long accountId) {
-        return journalEntryRepository.findByAccountId(accountId).stream().map(this::toResponse).toList();
+    public Page<JournalEntryResponse> getEntriesByAccount(Long accountId, Pageable pageable) {
+        return journalEntryRepository.findByAccountId(accountId, pageable).map(this::toResponse);
     }
 
     private JournalEntryResponse toResponse(JournalEntry e) {
