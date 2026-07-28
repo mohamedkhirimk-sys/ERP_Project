@@ -3,7 +3,7 @@ package com.erp.identity.entity;
 import com.erp.common.security.Role;
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDateTime;
+import com.erp.common.audit.Auditable;
 
 @Entity
 @Table(name = "users")
@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
+public class User extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -32,10 +32,4 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
 }

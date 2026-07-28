@@ -2,13 +2,13 @@ package com.erp.system.hrm.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.erp.common.audit.Auditable;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "leaves")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-public class Leave {
+public class Leave extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,10 +32,4 @@ public class Leave {
     @Builder.Default
     private String status = "PENDING";
 
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
 }

@@ -2,6 +2,7 @@ package com.erp.system.order.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.erp.common.audit.Auditable;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OrderEntity {
+public class OrderEntity extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

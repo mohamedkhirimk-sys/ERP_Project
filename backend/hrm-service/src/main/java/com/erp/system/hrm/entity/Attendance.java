@@ -2,13 +2,14 @@ package com.erp.system.hrm.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.erp.common.audit.Auditable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "attendance")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-public class Attendance {
+public class Attendance extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

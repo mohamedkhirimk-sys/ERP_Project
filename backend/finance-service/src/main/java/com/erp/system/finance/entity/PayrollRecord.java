@@ -2,14 +2,14 @@ package com.erp.system.finance.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.erp.common.audit.Auditable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "payroll_records")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-public class PayrollRecord {
+public class PayrollRecord extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,11 +40,8 @@ public class PayrollRecord {
     @Builder.Default
     private String status = "PENDING";
 
-    private LocalDateTime createdAt;
-
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
         if (netSalary == null || netSalary.compareTo(BigDecimal.ZERO) == 0) {
             netSalary = grossSalary.subtract(deductions != null ? deductions : BigDecimal.ZERO);
         }

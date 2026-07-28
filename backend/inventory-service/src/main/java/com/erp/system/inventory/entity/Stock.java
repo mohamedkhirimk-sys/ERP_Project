@@ -2,6 +2,7 @@ package com.erp.system.inventory.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.erp.common.audit.Auditable;
 
 @Entity
 @Table(name = "stocks")
@@ -10,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Stock {
+public class Stock extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

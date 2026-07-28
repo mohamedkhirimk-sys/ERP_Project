@@ -2,6 +2,7 @@ package com.erp.system.procurement.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.erp.common.audit.Auditable;
 import java.time.LocalDateTime;
 
 @Entity
@@ -11,7 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class GoodsReceivedNote {
+public class GoodsReceivedNote extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

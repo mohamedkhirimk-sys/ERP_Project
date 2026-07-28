@@ -2,14 +2,14 @@ package com.erp.system.hrm.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.erp.common.audit.Auditable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "employees")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-public class Employee {
+public class Employee extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,11 +40,8 @@ public class Employee {
     @Builder.Default
     private String status = "ACTIVE";
 
-    private LocalDateTime createdAt;
-
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
         if (employeeId == null) {
             employeeId = "EMP-" + System.currentTimeMillis();
         }

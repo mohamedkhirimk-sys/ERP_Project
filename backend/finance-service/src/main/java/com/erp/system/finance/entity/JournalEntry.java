@@ -4,11 +4,12 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import com.erp.common.audit.Auditable;
 
 @Entity
 @Table(name = "journal_entries")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-public class JournalEntry {
+public class JournalEntry extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,11 +33,8 @@ public class JournalEntry {
 
     private LocalDateTime entryDate;
 
-    private LocalDateTime createdAt;
-
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
         if (entryNumber == null) {
             entryNumber = "JE-" + System.currentTimeMillis();
         }
