@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -18,16 +19,19 @@ public class JournalEntryController {
     private final JournalEntryService journalEntryService;
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<JournalEntryResponse> createEntry(@Valid @RequestBody JournalEntryRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(journalEntryService.createEntry(request));
     }
 
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<JournalEntryResponse>> getAllEntries() {
         return ResponseEntity.ok(journalEntryService.getAllEntries());
     }
 
     @GetMapping("/account/{accountId}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<JournalEntryResponse>> getEntriesByAccount(@PathVariable Long accountId) {
         return ResponseEntity.ok(journalEntryService.getEntriesByAccount(accountId));
     }
