@@ -1,5 +1,6 @@
 package com.erp.identity.entity;
 
+import com.erp.common.security.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;

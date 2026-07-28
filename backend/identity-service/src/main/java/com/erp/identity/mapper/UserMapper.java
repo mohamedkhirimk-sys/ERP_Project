@@ -1,7 +1,7 @@
 package com.erp.identity.mapper;
 
 import com.erp.identity.dto.RegistrationRequest;
-import com.erp.identity.entity.Role;
+import com.erp.common.security.Role;
 import com.erp.identity.entity.User;
 import org.mapstruct.*;
 

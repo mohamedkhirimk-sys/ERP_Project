@@ -1,6 +1,6 @@
 package com.erp.identity.config;
 
-import com.erp.identity.entity.Role;
+import com.erp.common.security.Role;
 import com.erp.identity.entity.User;
 import com.erp.identity.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +39,7 @@ public class DataSeeder implements CommandLineRunner {
                 .email("staff@erp.local")
                 .fullName("Staff User")
                 .password(passwordEncoder.encode("staff123"))
-                .role(Role.STAFF)
+                .role(Role.MANAGER)
                 .build();
         userRepository.save(staff);
         log.info("Created default staff user (staff / staff123)");
