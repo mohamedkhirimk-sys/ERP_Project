@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"com.erp", "com.erp.system"})
 @EnableEurekaServer
 @EnableDiscoveryClient 
 public class EurekaServerApplication {

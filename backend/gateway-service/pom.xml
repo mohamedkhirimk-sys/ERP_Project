@@ -73,7 +73,12 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-    </dependencies>
+    <dependency>
+      <groupId>com.erp</groupId>
+      <artifactId>common-lib</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
   </dependencyManagement>
 
   <build>

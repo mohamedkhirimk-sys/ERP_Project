@@ -3,7 +3,7 @@ package com.erp.system.finance;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"com.erp", "com.erp.system"})
 public class FinanceApplication {
     public static void main(String[] args) {
         SpringApplication.run(FinanceApplication.class, args);
