@@ -41,4 +41,11 @@ public class AuthService {
 
         return jwtUtil.generateToken(user.getUsername(), user.getRole().name());
     }
+
+    public void deactivateUser(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + id));
+        user.setEnabled(false);
+        userRepository.save(user);
+    }
 }

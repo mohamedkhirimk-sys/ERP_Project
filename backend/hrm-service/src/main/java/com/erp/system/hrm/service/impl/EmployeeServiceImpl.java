@@ -1,5 +1,6 @@
 package com.erp.system.hrm.service.impl;
 
+import com.erp.system.hrm.client.IdentityClient;
 import com.erp.system.hrm.dto.EmployeeRequest;
 import com.erp.system.hrm.dto.EmployeeResponse;
 import com.erp.system.hrm.entity.Employee;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
@@ -16,6 +18,7 @@ import java.util.List;
 public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeRepository employeeRepository;
+    private final IdentityClient identityClient;
 
     @Override
     public EmployeeResponse createEmployee(EmployeeRequest request) {
@@ -70,6 +73,19 @@ public class EmployeeServiceImpl implements EmployeeService {
         employeeRepository.deleteById(id);
     }
 
+    @Override
+    @Transactional
+    public EmployeeResponse terminateEmployee(Long id) {
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Employee not found: " + id));
+        employee.setStatus("TERMINATED");
+        employeeRepository.save(employee);
+        if (employee.getUserId() != null) {
+            identityClient.deactivateUser(employee.getUserId());
+        }
+        return toResponse(employee);
+    }
+
     private EmployeeResponse toResponse(Employee emp) {
         return EmployeeResponse.builder()
                 .id(emp.getId())
@@ -77,6 +93,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .firstName(emp.getFirstName())
                 .lastName(emp.getLastName())
                 .email(emp.getEmail())
+                .userId(emp.getUserId())
                 .phone(emp.getPhone())
                 .department(emp.getDepartment())
                 .position(emp.getPosition())

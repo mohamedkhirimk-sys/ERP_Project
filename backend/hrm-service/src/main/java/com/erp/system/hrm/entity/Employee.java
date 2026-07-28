@@ -27,6 +27,8 @@ public class Employee extends Auditable {
     @Column(nullable = false, unique = true)
     private String email;
 
+    private Long userId;
+
     private String phone;
     private String department;
     private String position;

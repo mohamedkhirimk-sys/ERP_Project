@@ -12,6 +12,7 @@ public class EmployeeResponse {
     private String firstName;
     private String lastName;
     private String email;
+    private Long userId;
     private String phone;
     private String department;
     private String position;
