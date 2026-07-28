@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -24,34 +25,51 @@ public class OrderService {
 
     @Transactional
     public OrderResponse createOrder(OrderRequest request) {
+        if (orderRepository.findByIdempotencyKey(request.getIdempotencyKey()).isPresent()) {
+            throw new IllegalArgumentException("Duplicate order - idempotency key already exists");
+        }
+
         OrderEntity entity = OrderEntity.builder()
                 .orderNumber("ORD-" + System.currentTimeMillis())
+                .idempotencyKey(request.getIdempotencyKey())
                 .customerName(request.getCustomerName())
                 .totalAmount(request.getTotalAmount())
-                .status(request.getStatus())
+                .status("PENDING")
                 .build();
 
-        List<OrderItem> orderItems = request.getItems().stream().map(itemReq -> {
-            inventoryClient.deductStock(itemReq.getProductSku(), -itemReq.getQuantity());
-            OrderItem orderItem = OrderItem.builder()
-                    .productSku(itemReq.getProductSku())
-                    .quantity(itemReq.getQuantity())
-                    .order(entity)
+        List<OrderItem> orderItems = new ArrayList<>();
+        try {
+            for (var itemReq : request.getItems()) {
+                inventoryClient.deductStock(itemReq.getProductSku(), -itemReq.getQuantity());
+                OrderItem orderItem = OrderItem.builder()
+                        .productSku(itemReq.getProductSku())
+                        .quantity(itemReq.getQuantity())
+                        .order(entity)
+                        .build();
+                orderItems.add(orderItem);
+            }
+
+            entity.setItems(orderItems);
+            OrderEntity saved = orderRepository.save(entity);
+
+            PaymentRequest paymentReq = PaymentRequest.builder()
+                    .orderId(entity.getOrderNumber())
+                    .amount(request.getTotalAmount())
+                    .paymentMethod(request.getPaymentMethod())
                     .build();
-            return orderItem;
-        }).toList();
+            paymentClient.processPayment(paymentReq);
 
-        entity.setItems(orderItems);
-        OrderEntity saved = orderRepository.save(entity);
-
-        PaymentRequest paymentReq = PaymentRequest.builder()
-                .orderId(entity.getOrderNumber())
-                .amount(request.getTotalAmount())
-                .paymentMethod(request.getPaymentMethod())
-                .build();
-        paymentClient.processPayment(paymentReq);
-
-        return toResponse(saved);
+            saved.setStatus("CONFIRMED");
+            return toResponse(orderRepository.save(saved));
+        } catch (Exception e) {
+            for (var itemReq : request.getItems()) {
+                inventoryClient.deductStock(itemReq.getProductSku(), itemReq.getQuantity());
+            }
+            entity.setItems(orderItems);
+            entity.setStatus("FAILED");
+            orderRepository.save(entity);
+            throw new RuntimeException("Order creation failed, stock restored", e);
+        }
     }
 
     public Page<OrderResponse> getAllOrders(Pageable pageable) {

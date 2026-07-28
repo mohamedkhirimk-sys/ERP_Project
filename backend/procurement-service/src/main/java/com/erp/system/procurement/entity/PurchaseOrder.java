@@ -32,6 +32,9 @@ public class PurchaseOrder extends Auditable {
     @Column(nullable = false)
     private String status;
 
+    @Version
+    private Long version;
+
     private LocalDateTime orderedAt;
 
     @PrePersist

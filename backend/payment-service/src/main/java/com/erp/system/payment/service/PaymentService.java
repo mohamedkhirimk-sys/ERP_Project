@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,11 +26,18 @@ public class PaymentService {
 
     @Transactional
     public PaymentResponse processPayment(PaymentRequest request) {
+        if (request.getIdempotencyKey() != null) {
+            Optional<PaymentEntity> existing = paymentRepository.findByIdempotencyKey(request.getIdempotencyKey());
+            if (existing.isPresent()) {
+                return toResponse(existing.get());
+            }
+        }
         log.info("Processing payment for order: {}", request.getOrderId());
         validateRequest(request);
         String status = determinePaymentStatus(request);
         PaymentEntity payment = PaymentEntity.builder()
                 .orderId(request.getOrderId())
+                .idempotencyKey(request.getIdempotencyKey())
                 .amount(request.getAmount())
                 .paymentMethod(request.getPaymentMethod())
                 .status(PaymentStatus.valueOf(status))

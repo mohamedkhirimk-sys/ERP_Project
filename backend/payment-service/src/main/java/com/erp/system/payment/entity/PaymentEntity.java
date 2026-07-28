@@ -20,6 +20,9 @@ public class PaymentEntity extends Auditable {
     @Column(nullable = false)
     private String orderId;
 
+    @Column(unique = true)
+    private String idempotencyKey;
+
     @Column(nullable = false)
     private BigDecimal amount;
 

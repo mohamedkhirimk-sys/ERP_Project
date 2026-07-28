@@ -24,6 +24,9 @@ public class OrderEntity extends Auditable {
     @Column(nullable = false, unique = true)
     private String orderNumber;
 
+    @Column(unique = true)
+    private String idempotencyKey;
+
     @Column(nullable = false)
     private String customerName;
 

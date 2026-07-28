@@ -20,6 +20,12 @@ public class PayrollServiceImpl implements PayrollService {
 
     @Override
     public PayrollResponse createPayroll(PayrollRequest request) {
+        if (payrollRepository.existsByEmployeeIdAndPayPeriodStartAndPayPeriodEnd(
+                request.getEmployeeId(), request.getPayPeriodStart(), request.getPayPeriodEnd())) {
+            throw new IllegalArgumentException(
+                    "Payroll already exists for employee " + request.getEmployeeId()
+                    + " in period " + request.getPayPeriodStart() + " to " + request.getPayPeriodEnd());
+        }
         BigDecimal deductions = request.getDeductions() != null ? request.getDeductions() : BigDecimal.ZERO;
         PayrollRecord record = PayrollRecord.builder()
                 .employeeId(request.getEmployeeId())

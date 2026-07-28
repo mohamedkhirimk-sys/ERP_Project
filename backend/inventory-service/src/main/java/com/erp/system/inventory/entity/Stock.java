@@ -22,5 +22,8 @@ public class Stock extends Auditable {
     @Column(nullable = false)
     private Integer quantity;
 
+    @Version
+    private Long version;
+
     private String warehouseLocation;
 }
