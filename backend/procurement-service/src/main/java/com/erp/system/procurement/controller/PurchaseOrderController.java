@@ -10,7 +10,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,26 +20,22 @@ public class PurchaseOrderController {
     private final PurchaseOrderService purchaseOrderService;
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PurchaseOrderResponse> createPurchaseOrder(@Valid @RequestBody PurchaseOrderRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(purchaseOrderService.createPurchaseOrder(request));
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Page<PurchaseOrderResponse>> getAllPurchaseOrders(
             @PageableDefault(size = 20) Pageable pageable) {
         return ResponseEntity.ok(purchaseOrderService.getAllPurchaseOrders(pageable));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PurchaseOrderResponse> getPurchaseOrderById(@PathVariable Long id) {
         return ResponseEntity.ok(purchaseOrderService.getPurchaseOrderById(id));
     }
 
     @GetMapping("/vendor/{vendorId}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Page<PurchaseOrderResponse>> getPurchaseOrdersByVendor(
             @PathVariable Long vendorId,
             @PageableDefault(size = 20) Pageable pageable) {
@@ -48,7 +43,6 @@ public class PurchaseOrderController {
     }
 
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PurchaseOrderResponse> updatePurchaseOrderStatus(@PathVariable Long id, @RequestParam String status) {
         return ResponseEntity.ok(purchaseOrderService.updatePurchaseOrderStatus(id, status));
     }

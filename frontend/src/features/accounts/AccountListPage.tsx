@@ -21,7 +21,7 @@ export default function AccountListPage() {
 
   useEffect(() => {
     api.get('/api/accounts')
-      .then((res) => setAccounts(res.data))
+      .then((res) => setAccounts(res.data.content || res.data))
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [])

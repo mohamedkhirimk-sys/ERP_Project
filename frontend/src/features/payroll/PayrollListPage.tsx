@@ -19,7 +19,7 @@ export default function PayrollListPage() {
   const [loading, setLoading] = useState(true)
 
   const fetchRecords = () =>
-    api.get('/api/payroll').then((res) => setRecords(res.data))
+    api.get('/api/payroll').then((res) => setRecords(res.data.content || res.data))
 
   useEffect(() => { fetchRecords().finally(() => setLoading(false)) }, [])
 

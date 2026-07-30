@@ -17,7 +17,7 @@ export default function PurchaseOrderListPage() {
 
   useEffect(() => {
     api.get('/api/purchase-orders')
-      .then((res) => setOrders(res.data))
+      .then((res) => setOrders(res.data.content || res.data))
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [])

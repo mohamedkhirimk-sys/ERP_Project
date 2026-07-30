@@ -11,7 +11,7 @@ export default function StockListPage() {
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({ productSku: '', quantity: '', warehouseLocation: '' })
 
-  const fetchStocks = () => api.get('/api/inventory/stocks').then((res) => setStocks(res.data))
+  const fetchStocks = () => api.get('/api/inventory/stocks').then((res) => setStocks(res.data.content || res.data))
 
   useEffect(() => { fetchStocks().finally(() => setLoading(false)) }, [])
 

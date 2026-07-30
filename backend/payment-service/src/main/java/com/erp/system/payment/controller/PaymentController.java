@@ -5,7 +5,6 @@ import com.erp.system.payment.dto.PaymentResponse;
 import com.erp.system.payment.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,7 +15,6 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PaymentResponse> processPayment(@RequestBody PaymentRequest request) {
         return ResponseEntity.ok(paymentService.processPayment(request));
     }

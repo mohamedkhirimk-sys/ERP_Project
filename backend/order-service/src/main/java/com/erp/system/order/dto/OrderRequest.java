@@ -26,4 +26,6 @@ public class OrderRequest {
 
     @NotBlank(message = "Payment method is required")
     private String paymentMethod;
+
+    private String idempotencyKey;
 }

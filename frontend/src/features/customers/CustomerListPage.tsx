@@ -11,7 +11,7 @@ export default function CustomerListPage() {
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({ name: '', email: '', phone: '', address: '' })
 
-  const fetchCustomers = () => api.get('/api/customers').then((res) => setCustomers(res.data))
+  const fetchCustomers = () => api.get('/api/customers').then((res) => setCustomers(res.data.content || res.data))
 
   useEffect(() => { fetchCustomers().finally(() => setLoading(false)) }, [])
 

@@ -14,7 +14,7 @@ export default function JournalEntryListPage() {
 
   useEffect(() => {
     api.get('/api/journal-entries')
-      .then((res) => setEntries(res.data))
+      .then((res) => setEntries(res.data.content || res.data))
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [])

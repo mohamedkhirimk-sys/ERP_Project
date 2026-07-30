@@ -17,7 +17,7 @@ export default function InvoiceListPage() {
 
   useEffect(() => {
     api.get('/api/invoices')
-      .then((res) => setInvoices(res.data))
+      .then((res) => setInvoices(res.data.content || res.data))
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [])

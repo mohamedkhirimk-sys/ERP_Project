@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import com.erp.common.audit.Auditable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "goods_received_notes")
@@ -29,6 +31,10 @@ public class GoodsReceivedNote extends Auditable {
     private String status;
 
     private LocalDateTime receivedAt;
+
+    @OneToMany(mappedBy = "goodsReceivedNote", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<GRNLineItem> lineItems = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

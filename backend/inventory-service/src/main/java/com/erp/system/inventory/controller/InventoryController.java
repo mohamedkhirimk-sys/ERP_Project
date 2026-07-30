@@ -9,7 +9,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,25 +19,21 @@ public class InventoryController {
     private final InventoryService inventoryService;
 
     @PostMapping("/stock")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Stock> initializeStock(@RequestBody StockRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(inventoryService.initializeStock(request));
     }
 
     @GetMapping("/stock/{sku}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Stock> getStockBySku(@PathVariable String sku) {
         return ResponseEntity.ok(inventoryService.getStockBySku(sku));
     }
 
     @PutMapping("/stock/{sku}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Stock> updateStockQuantity(@PathVariable String sku, @RequestParam Integer quantityChange) {
         return ResponseEntity.ok(inventoryService.updateStockQuantity(sku, quantityChange));
     }
 
     @GetMapping("/stocks")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Page<Stock>> getAllStocks(
             @PageableDefault(size = 20) Pageable pageable) {
         return ResponseEntity.ok(inventoryService.getAllStocks(pageable));

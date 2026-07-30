@@ -3,6 +3,7 @@ package com.erp.system.procurement.service.impl;
 import com.erp.system.procurement.client.InventoryClient;
 import com.erp.system.procurement.dto.GoodsReceivedNoteRequest;
 import com.erp.system.procurement.dto.GoodsReceivedNoteResponse;
+import com.erp.system.procurement.entity.GRNLineItem;
 import com.erp.system.procurement.entity.GoodsReceivedNote;
 import com.erp.system.procurement.entity.PurchaseOrder;
 import com.erp.system.procurement.repository.GoodsReceivedNoteRepository;
@@ -13,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -31,10 +34,18 @@ public class GoodsReceivedNoteServiceImpl implements GoodsReceivedNoteService {
         request.getItems().forEach(item ->
                 inventoryClient.addStock(item.getProductSku(), item.getQuantity()));
 
+        List<GRNLineItem> lineItems = request.getItems().stream()
+                .map(item -> GRNLineItem.builder()
+                        .productSku(item.getProductSku())
+                        .quantity(item.getQuantity())
+                        .build())
+                .toList();
+
         GoodsReceivedNote grn = GoodsReceivedNote.builder()
                 .grnNumber("GRN-" + System.currentTimeMillis())
                 .purchaseOrder(po)
                 .status(request.getStatus())
+                .lineItems(lineItems)
                 .build();
 
         GoodsReceivedNote saved = grnRepository.save(grn);

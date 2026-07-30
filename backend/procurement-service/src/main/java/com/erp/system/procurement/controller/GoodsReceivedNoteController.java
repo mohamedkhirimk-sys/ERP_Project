@@ -10,7 +10,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,26 +20,22 @@ public class GoodsReceivedNoteController {
     private final GoodsReceivedNoteService grnService;
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<GoodsReceivedNoteResponse> createGoodsReceivedNote(@Valid @RequestBody GoodsReceivedNoteRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(grnService.createGoodsReceivedNote(request));
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Page<GoodsReceivedNoteResponse>> getAllGoodsReceivedNotes(
             @PageableDefault(size = 20) Pageable pageable) {
         return ResponseEntity.ok(grnService.getAllGoodsReceivedNotes(pageable));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<GoodsReceivedNoteResponse> getGoodsReceivedNoteById(@PathVariable Long id) {
         return ResponseEntity.ok(grnService.getGoodsReceivedNoteById(id));
     }
 
     @GetMapping("/purchase-order/{purchaseOrderId}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Page<GoodsReceivedNoteResponse>> getNotesByPurchaseOrder(
             @PathVariable Long purchaseOrderId,
             @PageableDefault(size = 20) Pageable pageable) {

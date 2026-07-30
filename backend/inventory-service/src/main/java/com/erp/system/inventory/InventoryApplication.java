@@ -2,11 +2,20 @@ package com.erp.system.inventory;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
-@SpringBootApplication(scanBasePackages = {"com.erp", "com.erp.system"})
-@EnableMethodSecurity
+@SpringBootApplication(
+    scanBasePackages = {"com.erp", "com.erp.system"},
+    exclude = {
+        SecurityAutoConfiguration.class,
+        UserDetailsServiceAutoConfiguration.class,
+        SecurityFilterAutoConfiguration.class,
+        OAuth2ResourceServerAutoConfiguration.class
+    })
 @EnableJpaAuditing
 public class InventoryApplication {
     public static void main(String[] args) {

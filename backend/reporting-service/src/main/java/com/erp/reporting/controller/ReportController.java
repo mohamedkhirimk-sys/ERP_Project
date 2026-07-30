@@ -4,7 +4,6 @@ import com.erp.reporting.dto.*;
 import com.erp.reporting.service.ReportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -12,7 +11,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/reports")
 @RequiredArgsConstructor
-@PreAuthorize("isAuthenticated()")
 public class ReportController {
 
     private final ReportService reportService;

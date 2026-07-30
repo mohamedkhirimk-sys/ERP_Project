@@ -11,7 +11,7 @@ export default function VendorListPage() {
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({ name: '', email: '', phone: '', address: '' })
 
-  const fetchVendors = () => api.get('/api/vendors').then((res) => setVendors(res.data))
+  const fetchVendors = () => api.get('/api/vendors').then((res) => setVendors(res.data.content || res.data))
 
   useEffect(() => { fetchVendors().finally(() => setLoading(false)) }, [])
 

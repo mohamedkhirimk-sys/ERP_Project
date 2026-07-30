@@ -161,13 +161,13 @@ public class DemoDataService {
     private String seedInvoices() {
         var today = LocalDate.now();
         List<Map<String, Object>> invoices = List.of(
-            Map.of("customerId", 1, "totalAmount", 2999.90, "status", "PAID", "dueDate", today.plusDays(30).toString(),
+            Map.of("customerId", 1, "totalAmount", 2999.90, "status", "PAID", "dueDate", today.plusDays(30).atStartOfDay().toString(),
                    "items", List.of(Map.of("productSku", "CHAIR-001", "quantity", 5))),
-            Map.of("customerId", 3, "totalAmount", 1049.97, "status", "PENDING", "dueDate", today.plusDays(15).toString(),
+            Map.of("customerId", 3, "totalAmount", 1049.97, "status", "PENDING", "dueDate", today.plusDays(15).atStartOfDay().toString(),
                    "items", List.of(Map.of("productSku", "MON-001", "quantity", 3))),
-            Map.of("customerId", 2, "totalAmount", 699.85, "status", "PENDING", "dueDate", today.plusDays(45).toString(),
+            Map.of("customerId", 2, "totalAmount", 699.85, "status", "PENDING", "dueDate", today.plusDays(45).atStartOfDay().toString(),
                    "items", List.of(Map.of("productSku", "KB-001", "quantity", 5))),
-            Map.of("customerId", 4, "totalAmount", 479.85, "status", "PAID", "dueDate", today.plusDays(30).toString(),
+            Map.of("customerId", 4, "totalAmount", 479.85, "status", "PAID", "dueDate", today.plusDays(30).atStartOfDay().toString(),
                    "items", List.of(Map.of("productSku", "HUB-001", "quantity", 6)))
         );
         int count = 0;
@@ -194,16 +194,27 @@ public class DemoDataService {
 
     private String seedJournalEntries() {
         var today = LocalDate.now();
-        // accountId mapping: Cash=1000, A/R=1100, Inventory=1200, A/P=2000, Equity=3000, Revenue=4000, Salaries=5000, Rent=5100, Utilities=5200
         var entries = List.of(
-            Map.of("entryDate", today.minusDays(5).toString(), "description", "Cash sale — Acme Corporation", "accountId", 1, "debit", 2999.90, "credit", 0),
-            Map.of("entryDate", today.minusDays(5).toString(), "description", "Cash sale — Acme Corporation", "accountId", 6, "debit", 0, "credit", 2999.90),
-            Map.of("entryDate", today.minusDays(3).toString(), "description", "Payroll for July 2026", "accountId", 7, "debit", 45700.00, "credit", 0),
-            Map.of("entryDate", today.minusDays(3).toString(), "description", "Payroll for July 2026", "accountId", 1, "debit", 0, "credit", 45700.00),
-            Map.of("entryDate", today.minusDays(2).toString(), "description", "Office rent payment", "accountId", 8, "debit", 5000.00, "credit", 0),
-            Map.of("entryDate", today.minusDays(2).toString(), "description", "Office rent payment", "accountId", 1, "debit", 0, "credit", 5000.00),
-            Map.of("entryDate", today.minusDays(1).toString(), "description", "Purchase inventory on credit", "accountId", 3, "debit", 2500.00, "credit", 0),
-            Map.of("entryDate", today.minusDays(1).toString(), "description", "Purchase inventory on credit", "accountId", 4, "debit", 0, "credit", 2500.00)
+            Map.of("description", "Cash sale — Acme Corporation",
+                   "lines", List.of(
+                       Map.of("accountId", 1, "debit", 2999.90, "credit", 0),
+                       Map.of("accountId", 6, "debit", 0, "credit", 2999.90)
+                   )),
+            Map.of("description", "Payroll for July 2026",
+                   "lines", List.of(
+                       Map.of("accountId", 7, "debit", 45700.00, "credit", 0),
+                       Map.of("accountId", 1, "debit", 0, "credit", 45700.00)
+                   )),
+            Map.of("description", "Office rent payment",
+                   "lines", List.of(
+                       Map.of("accountId", 8, "debit", 5000.00, "credit", 0),
+                       Map.of("accountId", 1, "debit", 0, "credit", 5000.00)
+                   )),
+            Map.of("description", "Purchase inventory on credit",
+                   "lines", List.of(
+                       Map.of("accountId", 3, "debit", 2500.00, "credit", 0),
+                       Map.of("accountId", 4, "debit", 0, "credit", 2500.00)
+                   ))
         );
         int count = 0;
         for (var e : entries) {

@@ -1,6 +1,7 @@
 package com.erp.system.product.service.impl;
 
 import com.erp.system.product.dto.ProductRequest;
+import com.erp.system.product.entity.PriceHistory;
 import com.erp.system.product.entity.Product;
 import com.erp.system.product.repository.ProductRepository;
 import com.erp.system.product.service.ProductService;
@@ -47,6 +48,16 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product updateProduct(Long id, ProductRequest request) {
         Product product = getProductById(id);
+
+        if (request.getPrice().compareTo(product.getPrice()) != 0) {
+            PriceHistory history = PriceHistory.builder()
+                    .product(product)
+                    .oldPrice(product.getPrice())
+                    .newPrice(request.getPrice())
+                    .build();
+            product.getPriceHistory().add(history);
+        }
+
         product.setName(request.getName());
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());

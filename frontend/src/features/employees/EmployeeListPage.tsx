@@ -20,7 +20,7 @@ export default function EmployeeListPage() {
 
   useEffect(() => {
     api.get('/api/employees')
-      .then((res) => setEmployees(res.data))
+      .then((res) => setEmployees(res.data.content || res.data))
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [])

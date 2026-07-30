@@ -10,7 +10,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,26 +20,22 @@ public class InvoiceController {
     private final InvoiceService invoiceService;
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<InvoiceResponse> createInvoice(@Valid @RequestBody InvoiceRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(invoiceService.createInvoice(request));
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Page<InvoiceResponse>> getAllInvoices(
             @PageableDefault(size = 20) Pageable pageable) {
         return ResponseEntity.ok(invoiceService.getAllInvoices(pageable));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<InvoiceResponse> getInvoiceById(@PathVariable Long id) {
         return ResponseEntity.ok(invoiceService.getInvoiceById(id));
     }
 
     @GetMapping("/customer/{customerId}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Page<InvoiceResponse>> getInvoicesByCustomer(
             @PathVariable Long customerId,
             @PageableDefault(size = 20) Pageable pageable) {
@@ -48,7 +43,6 @@ public class InvoiceController {
     }
 
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<InvoiceResponse> updateInvoiceStatus(@PathVariable Long id, @RequestParam String status) {
         return ResponseEntity.ok(invoiceService.updateInvoiceStatus(id, status));
     }

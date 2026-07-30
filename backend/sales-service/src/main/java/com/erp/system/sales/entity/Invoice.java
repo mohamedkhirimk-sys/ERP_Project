@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import com.erp.common.audit.Auditable;
 
 @Entity
@@ -35,6 +37,10 @@ public class Invoice extends Auditable {
     private LocalDateTime issuedAt;
 
     private LocalDateTime dueDate;
+
+    @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<InvoiceLineItem> lineItems = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

@@ -23,11 +23,6 @@
     <!-- 2. DEPENDENCY MANAGEMENT (This is where your error is) -->
     <!-- It must be a direct child of <project>, NOT inside <dependencies> -->
     <dependencies>
-    <!-- This is what's missing based on your error! -->
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-security</artifactId>
-    </dependency>
     <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-test</artifactId>

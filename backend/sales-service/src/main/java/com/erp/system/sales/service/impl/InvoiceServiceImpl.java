@@ -5,11 +5,13 @@ import com.erp.system.sales.dto.InvoiceRequest;
 import com.erp.system.sales.dto.InvoiceResponse;
 import com.erp.system.sales.entity.Customer;
 import com.erp.system.sales.entity.Invoice;
+import com.erp.system.sales.entity.InvoiceLineItem;
 import com.erp.system.sales.repository.CustomerRepository;
 import com.erp.system.sales.repository.InvoiceRepository;
 import com.erp.system.sales.service.InvoiceService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -31,12 +33,20 @@ public class InvoiceServiceImpl implements InvoiceService {
         request.getItems().forEach(item ->
                 inventoryClient.deductStock(item.getProductSku(), -item.getQuantity()));
 
+        List<InvoiceLineItem> lineItems = request.getItems().stream()
+                .map(item -> InvoiceLineItem.builder()
+                        .productSku(item.getProductSku())
+                        .quantity(item.getQuantity())
+                        .build())
+                .toList();
+
         Invoice invoice = Invoice.builder()
                 .invoiceNumber("INV-" + System.currentTimeMillis())
                 .customer(customer)
                 .totalAmount(request.getTotalAmount())
                 .status(request.getStatus())
                 .dueDate(request.getDueDate())
+                .lineItems(lineItems)
                 .build();
 
         Invoice saved = invoiceRepository.save(invoice);

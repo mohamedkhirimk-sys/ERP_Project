@@ -6,10 +6,12 @@ interface User {
   role: string
 }
 
+const DEFAULT_USER: User = { username: 'Developer', role: 'ADMIN' }
+
 export function useAuth() {
   const [user, setUser] = useState<User | null>(() => {
     const stored = localStorage.getItem('user')
-    return stored ? JSON.parse(stored) : null
+    return stored ? JSON.parse(stored) : DEFAULT_USER
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)

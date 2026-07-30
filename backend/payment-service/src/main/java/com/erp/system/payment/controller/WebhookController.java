@@ -4,7 +4,6 @@ import com.erp.system.payment.dto.WebhookRequest;
 import com.erp.system.payment.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,7 +14,6 @@ public class WebhookController {
     private final PaymentService paymentService;
 
     @PostMapping("/order-status")
-    @PreAuthorize("permitAll()")
     public ResponseEntity<String> handleOrderStatusWebhook(@RequestBody WebhookRequest request) {
         paymentService.handleOrderStatusUpdate(request.getOrderId(), request.getStatus());
         return ResponseEntity.ok("Webhook received");

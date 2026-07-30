@@ -12,7 +12,7 @@ export default function ProductListPage() {
 
   useEffect(() => {
     api.get('/api/products')
-      .then((res) => setProducts(res.data))
+      .then((res) => setProducts(res.data.content || res.data))
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [])

@@ -2,12 +2,12 @@ package com.erp.system.finance.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.*;
-import java.math.BigDecimal;
+import java.util.List;
 
 @Data @Builder @NoArgsConstructor @AllArgsConstructor
 public class JournalEntryRequest {
-    @NotNull private Long accountId;
     @NotBlank private String description;
-    @NotNull @Positive private BigDecimal debit;
-    @NotNull @Positive private BigDecimal credit;
+
+    @NotEmpty(message = "At least one line is required")
+    private List<JournalEntryLineRequest> lines;
 }

@@ -1,9 +1,9 @@
 package com.erp.system.finance.service.impl;
 
-import com.erp.system.finance.dto.JournalEntryRequest;
-import com.erp.system.finance.dto.JournalEntryResponse;
+import com.erp.system.finance.dto.*;
 import com.erp.system.finance.entity.Account;
 import com.erp.system.finance.entity.JournalEntry;
+import com.erp.system.finance.entity.JournalEntryLine;
 import com.erp.system.finance.repository.AccountRepository;
 import com.erp.system.finance.repository.JournalEntryRepository;
 import com.erp.system.finance.service.JournalEntryService;
@@ -12,7 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import java.math.BigDecimal;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -24,19 +25,28 @@ public class JournalEntryServiceImpl implements JournalEntryService {
     @Override
     @Transactional
     public JournalEntryResponse createEntry(JournalEntryRequest request) {
-        Account account = accountRepository.findById(request.getAccountId())
-                .orElseThrow(() -> new RuntimeException("Account not found: " + request.getAccountId()));
+        List<JournalEntryLine> lines = request.getLines().stream()
+                .map(lineReq -> {
+                    Account account = accountRepository.findById(lineReq.getAccountId())
+                            .orElseThrow(() -> new RuntimeException("Account not found: " + lineReq.getAccountId()));
+                    account.setBalance(account.getBalance().add(lineReq.getDebit().subtract(lineReq.getCredit())));
+                    accountRepository.save(account);
 
-        BigDecimal balanceChange = request.getDebit().subtract(request.getCredit());
-        account.setBalance(account.getBalance().add(balanceChange));
-        accountRepository.save(account);
+                    return JournalEntryLine.builder()
+                            .account(account)
+                            .debit(lineReq.getDebit())
+                            .credit(lineReq.getCredit())
+                            .build();
+                })
+                .toList();
 
         JournalEntry entry = JournalEntry.builder()
-                .account(account)
                 .description(request.getDescription())
-                .debit(request.getDebit())
-                .credit(request.getCredit())
+                .lines(lines)
                 .build();
+
+        lines.forEach(line -> line.setJournalEntry(entry));
+
         return toResponse(journalEntryRepository.save(entry));
     }
 
@@ -51,17 +61,24 @@ public class JournalEntryServiceImpl implements JournalEntryService {
     }
 
     private JournalEntryResponse toResponse(JournalEntry e) {
+        List<JournalEntryLineResponse> lineResponses = e.getLines().stream()
+                .map(line -> JournalEntryLineResponse.builder()
+                        .id(line.getId())
+                        .accountId(line.getAccount().getId())
+                        .accountName(line.getAccount().getAccountName())
+                        .accountCode(line.getAccount().getAccountCode())
+                        .debit(line.getDebit())
+                        .credit(line.getCredit())
+                        .build())
+                .toList();
+
         return JournalEntryResponse.builder()
                 .id(e.getId())
                 .entryNumber(e.getEntryNumber())
-                .accountId(e.getAccount().getId())
-                .accountName(e.getAccount().getAccountName())
-                .accountCode(e.getAccount().getAccountCode())
                 .description(e.getDescription())
-                .debit(e.getDebit())
-                .credit(e.getCredit())
                 .entryDate(e.getEntryDate())
                 .createdAt(e.getCreatedAt())
+                .lines(lineResponses)
                 .build();
     }
 }

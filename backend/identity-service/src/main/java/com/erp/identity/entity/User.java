@@ -32,7 +32,7 @@ public class User extends Auditable {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "boolean default true")
     @Builder.Default
     private boolean enabled = true;
 

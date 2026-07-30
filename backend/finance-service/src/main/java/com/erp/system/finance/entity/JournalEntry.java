@@ -2,8 +2,9 @@ package com.erp.system.finance.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import com.erp.common.audit.Auditable;
 
 @Entity
@@ -21,17 +22,11 @@ public class JournalEntry extends Auditable {
     @Column(nullable = false)
     private String description;
 
-    @Column(nullable = false)
-    private BigDecimal debit;
-
-    @Column(nullable = false)
-    private BigDecimal credit;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "account_id", nullable = false)
-    private Account account;
-
     private LocalDateTime entryDate;
+
+    @OneToMany(mappedBy = "journalEntry", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<JournalEntryLine> lines = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

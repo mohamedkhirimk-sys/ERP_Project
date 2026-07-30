@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import com.erp.common.audit.Auditable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "products")
@@ -29,4 +31,8 @@ public class Product extends Auditable {
     private String sku;
 
     private Integer stockQuantity;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<PriceHistory> priceHistory = new ArrayList<>();
 }

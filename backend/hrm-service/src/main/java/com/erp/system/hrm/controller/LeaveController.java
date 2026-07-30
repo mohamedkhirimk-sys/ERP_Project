@@ -10,7 +10,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,25 +20,21 @@ public class LeaveController {
     private final LeaveService leaveService;
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<LeaveResponse> createLeave(@Valid @RequestBody LeaveRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(leaveService.createLeave(request));
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Page<LeaveResponse>> getAllLeaves(@PageableDefault(size = 20) Pageable pageable) {
         return ResponseEntity.ok(leaveService.getAllLeaves(pageable));
     }
 
     @GetMapping("/employee/{employeeId}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Page<LeaveResponse>> getLeavesByEmployee(@PathVariable Long employeeId, @PageableDefault(size = 20) Pageable pageable) {
         return ResponseEntity.ok(leaveService.getLeavesByEmployee(employeeId, pageable));
     }
 
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<LeaveResponse> updateLeaveStatus(@PathVariable Long id, @RequestParam String status) {
         return ResponseEntity.ok(leaveService.updateLeaveStatus(id, status));
     }

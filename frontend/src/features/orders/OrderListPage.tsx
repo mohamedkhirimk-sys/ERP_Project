@@ -19,7 +19,7 @@ export default function OrderListPage() {
 
   useEffect(() => {
     api.get('/api/orders')
-      .then((res) => setOrders(res.data))
+      .then((res) => setOrders(res.data.content || res.data))
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [])
