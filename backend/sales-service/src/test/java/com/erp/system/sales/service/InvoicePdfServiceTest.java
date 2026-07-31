@@ -114,14 +114,13 @@ class InvoicePdfServiceTest {
     }
 
     /**
-     * Reads the text of page 1 directly from the PDF content stream, decoding
-     * the literal and hex strings as Windows-1252 (WinAnsi), which is the
-     * encoding OpenPDF uses for standard Type1 fonts. Joins fragments with a
-     * single space so that text wrapped inside table cells still matches.
-     *
-     * <p>This is used instead of {@code PdfTextExtractor}, whose decoding of
-     * WinAnsi bytes in standard Type1 fonts is broken in OpenPDF 2.0.3
-     * (see https://github.com/LibrePDF/OpenPDF/issues/618).
+     * This decoder exists because OpenPDF 2.0.3's PdfTextExtractor cannot be
+     * used here: (a) it has no static getTextFromPage(PdfReader, int), and
+     * (b) it mangles WinAnsi accented characters (é/É/—) written with
+     * standard Type1 fonts (known issue, LibrePDF/OpenPDF#618), so the
+     * accented strings asserted below could never match. Byte-level
+     * Windows-1252 decoding of the page content stream is therefore required,
+     * and it validates the exact bytes the service writes to the PDF.
      */
     private static String pageText(byte[] pdf) throws Exception {
         PdfReader reader = new PdfReader(pdf);

@@ -95,7 +95,7 @@ public class InvoicePdfService {
 
             BigDecimal totalHt = BigDecimal.ZERO;
             PdfPTable table = new PdfPTable(7);
-            table.setWidths(new float[]{5f, 1.5f, 1.5f, 2.5f, 1.5f, 2.5f, 2.5f});
+            table.setWidths(new float[]{5f, 1.5f, 1.5f, 3f, 1.5f, 2.5f, 2.5f});
             addCell(table, "Description", boldFont, Element.ALIGN_LEFT);
             addCell(table, "Quantité", boldFont, Element.ALIGN_RIGHT);
             addCell(table, "Unité", boldFont, Element.ALIGN_RIGHT);
