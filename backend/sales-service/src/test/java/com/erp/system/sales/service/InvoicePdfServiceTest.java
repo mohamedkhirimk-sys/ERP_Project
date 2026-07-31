@@ -7,14 +7,19 @@ import com.erp.system.sales.entity.Customer;
 import com.erp.system.sales.entity.Invoice;
 import com.erp.system.sales.entity.InvoiceLineItem;
 import com.erp.system.sales.repository.InvoiceRepository;
+import com.lowagie.text.pdf.PRStream;
+import com.lowagie.text.pdf.PdfArray;
+import com.lowagie.text.pdf.PdfName;
+import com.lowagie.text.pdf.PdfObject;
 import com.lowagie.text.pdf.PdfReader;
-import com.lowagie.text.pdf.parser.PdfTextExtractor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.Charset;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +30,8 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class InvoicePdfServiceTest {
+
+    private static final Charset WIN_ANSI = Charset.forName("windows-1252");
 
     @Mock
     private InvoiceRepository invoiceRepository;
@@ -39,12 +46,12 @@ class InvoicePdfServiceTest {
     }
 
     @Test
-    void generatePdf_shouldReturnPdfBytes_whenInvoiceExists() throws Exception {
+    void generatePdf_shouldRenderTemplateLayout_whenInvoiceExists() throws Exception {
         Customer customer = Customer.builder().id(1L).name("Acme Corporation")
                 .email("billing@acme.com").phone("555-0100").address("1 Main St").build();
         Invoice invoice = Invoice.builder()
                 .id(1L).invoiceNumber("INV-123")
-                .customer(customer).totalAmount(new BigDecimal("599.98")).status("PAID")
+                .customer(customer).totalAmount(new BigDecimal("719.98")).status("PAID")
                 .build();
         invoice.setLineItems(List.of(
                 InvoiceLineItem.builder().productSku("CHAIR-001").quantity(2).build()));
@@ -56,8 +63,28 @@ class InvoicePdfServiceTest {
         byte[] pdf = pdfService.generatePdf(1L);
 
         assertThat(pdf).startsWith("%PDF".getBytes());
-        String text = new PdfTextExtractor(new PdfReader(pdf)).getTextFromPage(1);
-        assertThat(text).contains("INV-123", "Acme Corporation", "Ergonomic Office Chair", "599.98");
+        String text = pageText(pdf);
+        assertThat(text).contains(
+                "FACTURE",
+                "Numéro de facture : INV-123",
+                "Statut : PAID",
+                "Vendeur",
+                "Mon Entreprise",
+                "Client",
+                "Acme Corporation",
+                "Ergonomic Office Chair",
+                "Prix unitaire HT",
+                "% TVA",
+                "Total TVA",
+                "Total TTC",
+                "20 %",
+                "pcs",
+                "$299.99",
+                "$599.98",
+                "$120.00",
+                "$719.98",
+                "Total HT",
+                "Généré le :");
     }
 
     @Test
@@ -75,8 +102,8 @@ class InvoicePdfServiceTest {
         byte[] pdf = pdfService.generatePdf(1L);
 
         assertThat(pdf).startsWith("%PDF".getBytes());
-        String text = new PdfTextExtractor(new PdfReader(pdf)).getTextFromPage(1);
-        assertThat(text).contains("GONE-001", "n/a");
+        String text = pageText(pdf);
+        assertThat(text).contains("GONE-001", "n/a", "—", "Total TTC", "$10.00");
     }
 
     @Test
@@ -84,5 +111,149 @@ class InvoicePdfServiceTest {
         when(invoiceRepository.findById(99L)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> pdfService.generatePdf(99L))
                 .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    /**
+     * Reads the text of page 1 directly from the PDF content stream, decoding
+     * the literal and hex strings as Windows-1252 (WinAnsi), which is the
+     * encoding OpenPDF uses for standard Type1 fonts. Joins fragments with a
+     * single space so that text wrapped inside table cells still matches.
+     *
+     * <p>This is used instead of {@code PdfTextExtractor}, whose decoding of
+     * WinAnsi bytes in standard Type1 fonts is broken in OpenPDF 2.0.3
+     * (see https://github.com/LibrePDF/OpenPDF/issues/618).
+     */
+    private static String pageText(byte[] pdf) throws Exception {
+        PdfReader reader = new PdfReader(pdf);
+        try {
+            PdfObject contents = PdfReader.getPdfObject(reader.getPageN(1).get(PdfName.CONTENTS));
+            StringBuilder text = new StringBuilder();
+            if (contents instanceof PRStream) {
+                text.append(decodeContent(PdfReader.getStreamBytes((PRStream) contents)));
+            } else if (contents instanceof PdfArray) {
+                for (PdfObject obj : ((PdfArray) contents).getElements()) {
+                    PdfObject resolved = PdfReader.getPdfObject(obj);
+                    if (resolved instanceof PRStream) {
+                        text.append(decodeContent(PdfReader.getStreamBytes((PRStream) resolved)));
+                    }
+                }
+            }
+            return text.toString();
+        } finally {
+            reader.close();
+        }
+    }
+
+    private static String decodeContent(byte[] content) throws Exception {
+        StringBuilder result = new StringBuilder();
+        int i = 0;
+        while (i < content.length) {
+            byte b = content[i];
+            if (b == '(') {
+                result.append(' ').append(decodeLiteralString(content, i + 1));
+                i = skipLiteralString(content, i + 1);
+            } else if (b == '<') {
+                result.append(' ').append(decodeHexString(content, i + 1));
+                i = skipHexString(content, i + 1);
+            } else {
+                i++;
+            }
+        }
+        return result.toString();
+    }
+
+    private static String decodeLiteralString(byte[] content, int start) throws Exception {
+        ByteArrayOutputStream literal = new ByteArrayOutputStream();
+        int i = start;
+        while (i < content.length && content[i] != ')') {
+            if (content[i] == '\\') {
+                i++;
+                if (i >= content.length) {
+                    break;
+                }
+                byte e = content[i];
+                if (e >= '0' && e <= '7') {
+                    int octal = 0;
+                    int digits = 0;
+                    while (digits < 3 && i < content.length && content[i] >= '0' && content[i] <= '7') {
+                        octal = octal * 8 + (content[i] - '0');
+                        i++;
+                        digits++;
+                    }
+                    literal.write(octal);
+                    continue;
+                }
+                switch (e) {
+                    case 'n' -> literal.write('\n');
+                    case 'r' -> literal.write('\r');
+                    case 't' -> literal.write('\t');
+                    case 'b' -> literal.write(8);
+                    case 'f' -> literal.write(12);
+                    case '(' -> literal.write('(');
+                    case ')' -> literal.write(')');
+                    case '\\' -> literal.write('\\');
+                    default -> literal.write(e);
+                }
+            } else {
+                literal.write(content[i]);
+            }
+            i++;
+        }
+        return new String(literal.toByteArray(), WIN_ANSI);
+    }
+
+    private static int skipLiteralString(byte[] content, int start) {
+        int i = start;
+        while (i < content.length) {
+            if (content[i] == '\\') {
+                i += 2;
+            } else if (content[i] == ')') {
+                return i + 1;
+            } else {
+                i++;
+            }
+        }
+        return i;
+    }
+
+    private static String decodeHexString(byte[] content, int start) throws Exception {
+        ByteArrayOutputStream hex = new ByteArrayOutputStream();
+        int i = start;
+        while (i < content.length && content[i] != '>') {
+            while (i < content.length && Character.isWhitespace(content[i] & 0xFF)) {
+                i++;
+            }
+            if (i >= content.length || content[i] == '>') {
+                break;
+            }
+            int high = hexDigit(content[i]);
+            i++;
+            int low = 0;
+            if (i < content.length && content[i] != '>' && !Character.isWhitespace(content[i] & 0xFF)) {
+                low = hexDigit(content[i]);
+                i++;
+            }
+            hex.write((high << 4) | low);
+        }
+        return new String(hex.toByteArray(), WIN_ANSI);
+    }
+
+    private static int skipHexString(byte[] content, int start) {
+        int i = start;
+        while (i < content.length && content[i] != '>') {
+            i++;
+        }
+        return i < content.length ? i + 1 : i;
+    }
+
+    private static int hexDigit(byte b) {
+        int c = b & 0xFF;
+        if (c >= '0' && c <= '9') {
+            return c - '0';
+        }
+        if (c >= 'a' && c <= 'f') {
+            return c - 'a' + 10;
+        }
+        return c - 'A' + 10;
     }
 }
