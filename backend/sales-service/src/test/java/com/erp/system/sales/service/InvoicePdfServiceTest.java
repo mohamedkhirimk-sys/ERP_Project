@@ -84,6 +84,9 @@ class InvoicePdfServiceTest {
                 "$120.00",
                 "$719.98",
                 "Total HT",
+                "Total HT $599.98",
+                "Total TVA $120.00",
+                "Total TTC $719.98",
                 "Généré le :");
     }
 
@@ -103,7 +106,8 @@ class InvoicePdfServiceTest {
 
         assertThat(pdf).startsWith("%PDF".getBytes());
         String text = pageText(pdf);
-        assertThat(text).contains("GONE-001", "n/a", "—", "Total TTC", "$10.00");
+        assertThat(text).contains("GONE-001", "n/a", "—", "Total TTC",
+                "Total HT $0.00", "Total TVA $0.00", "Total TTC $0.00");
     }
 
     @Test

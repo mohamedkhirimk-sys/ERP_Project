@@ -94,6 +94,8 @@ public class InvoicePdfService {
             document.add(new Paragraph(" "));
 
             BigDecimal totalHt = BigDecimal.ZERO;
+            BigDecimal totalTva = BigDecimal.ZERO;
+            BigDecimal totalTtc = BigDecimal.ZERO;
             PdfPTable table = new PdfPTable(7);
             table.setWidths(new float[]{5f, 1.5f, 1.5f, 3f, 1.5f, 2.5f, 2.5f});
             addCell(table, "Description", boldFont, Element.ALIGN_LEFT);
@@ -122,6 +124,8 @@ public class InvoicePdfService {
                 BigDecimal lineTtc = hasPrice ? lineHt.add(lineTva) : BigDecimal.ZERO;
                 if (hasPrice) {
                     totalHt = totalHt.add(lineHt);
+                    totalTva = totalTva.add(lineTva);
+                    totalTtc = totalTtc.add(lineTtc);
                 }
 
                 addCell(table, product != null ? product.getName() : item.getProductSku(), normalFont, Element.ALIGN_LEFT);
@@ -136,7 +140,6 @@ public class InvoicePdfService {
 
             document.add(new Paragraph(" "));
 
-            BigDecimal totalTva = invoice.getTotalAmount().subtract(totalHt);
             PdfPTable totals = new PdfPTable(2);
             totals.setWidths(new float[]{1f, 1f});
             totals.setWidthPercentage(40f);
@@ -146,7 +149,7 @@ public class InvoicePdfService {
             addCell(totals, "Total TVA", normalFont, Element.ALIGN_LEFT);
             addCell(totals, "$" + totalTva.setScale(2, RoundingMode.HALF_UP), normalFont, Element.ALIGN_RIGHT);
             addCell(totals, "Total TTC", boldFont, Element.ALIGN_LEFT);
-            addCell(totals, "$" + invoice.getTotalAmount().setScale(2, RoundingMode.HALF_UP), boldFont, Element.ALIGN_RIGHT);
+            addCell(totals, "$" + totalTtc.setScale(2, RoundingMode.HALF_UP), boldFont, Element.ALIGN_RIGHT);
             document.add(totals);
 
             document.add(new Paragraph(" "));
