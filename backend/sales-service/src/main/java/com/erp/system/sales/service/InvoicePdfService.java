@@ -16,9 +16,10 @@ import com.lowagie.text.Phrase;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
@@ -26,12 +27,13 @@ import java.math.RoundingMode;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class InvoicePdfService {
 
     private final InvoiceRepository invoiceRepository;
     private final ProductClient productClient;
 
-    @Transactional
+    @Transactional(readOnly = true)
     public byte[] generatePdf(Long invoiceId) {
         Invoice invoice = invoiceRepository.findById(invoiceId)
                 .orElseThrow(() -> new ResourceNotFoundException("Invoice", invoiceId));
@@ -77,26 +79,29 @@ public class InvoicePdfService {
                 try {
                     product = productClient.getProductBySku(item.getProductSku());
                 } catch (Exception e) {
+                    log.warn("Product lookup failed for SKU {}: {}", item.getProductSku(), e.getMessage());
                     product = null;
                 }
                 String name = product != null ? product.getName() : item.getProductSku();
                 String unitPrice = product != null && product.getPrice() != null
-                        ? "$" + product.getPrice() : "n/a";
+                        ? "$" + product.getPrice().setScale(2, RoundingMode.HALF_UP) : "n/a";
                 BigDecimal lineTotal = product != null && product.getPrice() != null
                         ? product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()))
                         : BigDecimal.ZERO;
+                String lineTotalText = product != null && product.getPrice() != null
+                        ? "$" + lineTotal.setScale(2, RoundingMode.HALF_UP) : "—";
                 addCell(table, item.getProductSku(), normalFont, Element.ALIGN_LEFT);
                 addCell(table, name, normalFont, Element.ALIGN_LEFT);
                 addCell(table, String.valueOf(item.getQuantity()), normalFont, Element.ALIGN_RIGHT);
                 addCell(table, unitPrice, normalFont, Element.ALIGN_RIGHT);
-                addCell(table, "$" + lineTotal.setScale(2, RoundingMode.HALF_UP), normalFont, Element.ALIGN_RIGHT);
+                addCell(table, lineTotalText, normalFont, Element.ALIGN_RIGHT);
             }
 
             addCell(table, "", normalFont, Element.ALIGN_LEFT);
             addCell(table, "", normalFont, Element.ALIGN_LEFT);
             addCell(table, "", normalFont, Element.ALIGN_LEFT);
             addCell(table, "Total", boldFont, Element.ALIGN_RIGHT);
-            addCell(table, "$" + invoice.getTotalAmount(), boldFont, Element.ALIGN_RIGHT);
+            addCell(table, "$" + invoice.getTotalAmount().setScale(2, RoundingMode.HALF_UP), boldFont, Element.ALIGN_RIGHT);
 
             document.add(table);
         } catch (Exception e) {
