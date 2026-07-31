@@ -10,6 +10,7 @@ public interface ProductService {
     Product createProduct(ProductRequest request);
     Page<Product> getAllProducts(Pageable pageable);
     Product getProductById(Long id);
+    Product getProductBySku(String sku);
     Product updateProduct(Long id, ProductRequest request);
     void deleteProduct(Long id);
 }

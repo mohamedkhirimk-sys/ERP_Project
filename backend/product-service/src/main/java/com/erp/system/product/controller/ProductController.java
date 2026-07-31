@@ -28,6 +28,11 @@ public class ProductController {
         return ResponseEntity.ok(productService.getProductById(id));
     }
 
+    @GetMapping("/by-sku/{sku}")
+    public ResponseEntity<Product> getProductBySku(@PathVariable String sku) {
+        return ResponseEntity.ok(productService.getProductBySku(sku));
+    }
+
     @PostMapping
     public ResponseEntity<Product> createProduct(@Valid @RequestBody ProductRequest request) {
         return ResponseEntity.ok(productService.createProduct(request));

@@ -53,4 +53,23 @@ class ProductControllerTest {
         mockMvc.perform(get("/api/products/1"))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    void getProductBySku_shouldReturn200_whenFound() throws Exception {
+        Product product = new Product();
+        product.setSku("CHAIR-001");
+        product.setName("Ergonomic Office Chair");
+        product.setPrice(new java.math.BigDecimal("299.99"));
+        when(productService.getProductBySku("CHAIR-001")).thenReturn(product);
+        mockMvc.perform(get("/api/products/by-sku/CHAIR-001"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void getProductBySku_shouldReturn404_whenNotFound() throws Exception {
+        when(productService.getProductBySku("UNKNOWN-001"))
+                .thenThrow(new ResourceNotFoundException("Product", "UNKNOWN-001"));
+        mockMvc.perform(get("/api/products/by-sku/UNKNOWN-001"))
+                .andExpect(status().isNotFound());
+    }
 }

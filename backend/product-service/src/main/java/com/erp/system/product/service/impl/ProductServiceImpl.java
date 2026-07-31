@@ -1,5 +1,6 @@
 package com.erp.system.product.service.impl;
 
+import com.erp.common.exception.ResourceNotFoundException;
 import com.erp.system.product.dto.ProductRequest;
 import com.erp.system.product.entity.PriceHistory;
 import com.erp.system.product.entity.Product;
@@ -43,6 +44,12 @@ public class ProductServiceImpl implements ProductService {
     public Product getProductById(Long id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+    }
+
+    @Override
+    public Product getProductBySku(String sku) {
+        return productRepository.findBySku(sku)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", sku));
     }
 
     @Override
