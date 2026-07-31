@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleConflict(DataIntegrityViolationException ex, HttpServletRequest request) {
-        return buildResponse(HttpStatus.CONFLICT, "Data integrity violation", request);
+        return buildResponse(HttpStatus.CONFLICT, "Data integrity violation: " + ex.getMessage(), request);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -45,7 +45,8 @@ public class GlobalExceptionHandler {
         if (ACCESS_DENIED_CLASS.equals(ex.getClass().getName())) {
             return buildResponse(HttpStatus.FORBIDDEN, "Access denied", request);
         }
-        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", request);
+        String detail = ex.getClass().getSimpleName() + ": " + ex.getMessage();
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, detail, request);
     }
 
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String message, HttpServletRequest request) {

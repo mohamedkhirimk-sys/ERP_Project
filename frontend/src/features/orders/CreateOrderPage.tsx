@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '@/lib/axios'
 
@@ -6,21 +6,46 @@ const inputClass = 'w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm
 const selectClass = 'w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-white'
 
 interface OrderItem { productSku: string; quantity: number }
+interface Customer { id: number; name: string; email: string }
+interface Product { id: number; name: string; sku: string; price: number; description?: string }
 
 export default function CreateOrderPage() {
   const navigate = useNavigate()
+  const [customers, setCustomers] = useState<Customer[]>([])
+  const [products, setProducts] = useState<Product[]>([])
   const [form, setForm] = useState({ customerName: '', totalAmount: '', status: 'PENDING', paymentMethod: 'CREDIT_CARD' })
   const [items, setItems] = useState<OrderItem[]>([{ productSku: '', quantity: 1 }])
   const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    api.get('/api/customers').then((res) => setCustomers(res.data)).catch(() => {})
+    api.get('/api/products?size=100').then((res) => setProducts(res.data.content || res.data)).catch(() => {})
+  }, [])
+
+  const calcTotal = (itm: OrderItem[]) =>
+    itm.reduce((sum, i) => {
+      const p = products.find((pr) => pr.sku === i.productSku)
+      return sum + (p ? p.price * i.quantity : 0)
+    }, 0)
 
   const updateItem = (index: number, field: keyof OrderItem, value: string) => {
     const updated = [...items]
     if (field === 'quantity') updated[index] = { ...updated[index], quantity: Number(value) || 0 }
     else updated[index] = { ...updated[index], productSku: value }
     setItems(updated)
+    setForm((f) => ({ ...f, totalAmount: calcTotal(updated).toFixed(2) }))
   }
-  const addItem = () => setItems([...items, { productSku: '', quantity: 1 }])
-  const removeItem = (index: number) => items.length > 1 && setItems(items.filter((_, i) => i !== index))
+  const addItem = () => {
+    const updated = [...items, { productSku: '', quantity: 1 }]
+    setItems(updated)
+    setForm((f) => ({ ...f, totalAmount: calcTotal(updated).toFixed(2) }))
+  }
+  const removeItem = (index: number) => {
+    if (items.length <= 1) return
+    const updated = items.filter((_, i) => i !== index)
+    setItems(updated)
+    setForm((f) => ({ ...f, totalAmount: calcTotal(updated).toFixed(2) }))
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -41,7 +66,7 @@ export default function CreateOrderPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-4xl mx-auto">
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
           <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
@@ -56,11 +81,14 @@ export default function CreateOrderPage() {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Customer Name</label>
-            <input value={form.customerName} onChange={(e) => setForm({ ...form, customerName: e.target.value })} className={inputClass} placeholder="Customer name" required />
+            <select value={form.customerName} onChange={(e) => setForm({ ...form, customerName: e.target.value })} className={selectClass} required>
+              <option value="">Select a customer</option>
+              {customers.map((c) => <option key={c.id} value={c.name}>{c.name}</option>)}
+            </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Total Amount</label>
-            <input type="number" step="0.01" value={form.totalAmount} onChange={(e) => setForm({ ...form, totalAmount: e.target.value })} className={inputClass} placeholder="0.00" required />
+            <input type="number" step="0.01" value={form.totalAmount} className={`${inputClass} bg-gray-50`} placeholder="Auto-calculated" readOnly required />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
@@ -83,16 +111,41 @@ export default function CreateOrderPage() {
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>Add Item
             </button>
           </div>
+          <div className="flex items-center gap-2 px-1 mb-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            <span className="w-44">Product</span>
+            <span className="w-24">Qty</span>
+            <span className="flex-1 min-w-0" />
+            <span className="w-20 text-right">Price</span>
+            <span className="w-24 text-right">Total</span>
+            <span className="w-9" />
+          </div>
           <div className="space-y-2">
-            {items.map((item, i) => (
-              <div key={i} className="flex gap-2">
-                <input value={item.productSku} onChange={(e) => updateItem(i, 'productSku', e.target.value)} placeholder="SKU" className={`${inputClass} flex-1`} required />
-                <input type="number" min="1" value={item.quantity} onChange={(e) => updateItem(i, 'quantity', e.target.value)} placeholder="Qty" className={`${inputClass} w-24`} required />
-                <button type="button" onClick={() => removeItem(i)} className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-              </div>
-            ))}
+            {items.map((item, i) => {
+              const p = products.find((pr) => pr.sku === item.productSku)
+              return (
+                <div key={i} className="flex items-center gap-2">
+                  <select value={item.productSku} onChange={(e) => updateItem(i, 'productSku', e.target.value)} className={`${selectClass} w-44`} required>
+                    <option value="">Select product</option>
+                    {products.map((p) => <option key={p.id} value={p.sku}>{p.name} ({p.sku})</option>)}
+                  </select>
+                  <input type="number" min="1" value={item.quantity} onChange={(e) => updateItem(i, 'quantity', e.target.value)} placeholder="Qty" className={`${inputClass} w-24`} required />
+                  <div className="flex-1 min-w-0">
+                    {p ? (
+                      <p className="text-sm text-gray-900 truncate" title={`${p.name} — ${p.description}`}>
+                        {p.name}{p.description && <span className="text-gray-500"> — {p.description}</span>}
+                      </p>
+                    ) : (
+                      <p className="text-sm text-gray-400">Select a product</p>
+                    )}
+                  </div>
+                  {p && <span className="text-sm text-gray-600 w-20 text-right shrink-0">${p.price.toFixed(2)}</span>}
+                  {p && <span className="text-sm font-semibold text-gray-900 w-24 text-right shrink-0">${(p.price * item.quantity).toFixed(2)}</span>}
+                  <button type="button" onClick={() => removeItem(i)} className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                </div>
+              )
+            })}
           </div>
         </div>
 

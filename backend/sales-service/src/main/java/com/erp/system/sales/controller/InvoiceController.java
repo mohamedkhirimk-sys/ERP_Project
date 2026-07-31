@@ -2,6 +2,8 @@ package com.erp.system.sales.controller;
 
 import com.erp.system.sales.dto.InvoiceRequest;
 import com.erp.system.sales.dto.InvoiceResponse;
+import com.erp.system.sales.dto.OrderInvoiceRequest;
+import com.erp.system.sales.dto.UpdateInvoiceRequest;
 import com.erp.system.sales.service.InvoiceService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,11 @@ public class InvoiceController {
     @PostMapping
     public ResponseEntity<InvoiceResponse> createInvoice(@Valid @RequestBody InvoiceRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(invoiceService.createInvoice(request));
+    }
+
+    @PostMapping("/from-order")
+    public ResponseEntity<InvoiceResponse> createInvoiceFromOrder(@Valid @RequestBody OrderInvoiceRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(invoiceService.createInvoiceFromOrder(request));
     }
 
     @GetMapping
@@ -45,5 +52,10 @@ public class InvoiceController {
     @PatchMapping("/{id}/status")
     public ResponseEntity<InvoiceResponse> updateInvoiceStatus(@PathVariable Long id, @RequestParam String status) {
         return ResponseEntity.ok(invoiceService.updateInvoiceStatus(id, status));
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<InvoiceResponse> updateInvoice(@PathVariable Long id, @Valid @RequestBody UpdateInvoiceRequest request) {
+        return ResponseEntity.ok(invoiceService.updateInvoice(id, request));
     }
 }

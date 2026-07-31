@@ -11,16 +11,50 @@ const statusBadge: Record<string, string> = {
   CANCELLED: 'bg-gray-100 text-gray-800',
 }
 
+const selectClass = 'border border-gray-300 rounded-lg px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-white'
+
 export default function InvoiceListPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [loading, setLoading] = useState(true)
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [draft, setDraft] = useState({ status: '', dueDate: '' })
+  const [saving, setSaving] = useState(false)
+
+  const load = () => api.get('/api/invoices')
+    .then((res) => setInvoices(res.data.content || res.data))
+    .catch(console.error)
 
   useEffect(() => {
-    api.get('/api/invoices')
-      .then((res) => setInvoices(res.data.content || res.data))
-      .catch(console.error)
-      .finally(() => setLoading(false))
+    load().finally(() => setLoading(false))
   }, [])
+
+  const startEdit = (inv: Invoice) => {
+    setEditingId(inv.id)
+    setDraft({ status: inv.status, dueDate: inv.dueDate ? inv.dueDate.slice(0, 10) : '' })
+  }
+
+  const cancelEdit = () => {
+    setEditingId(null)
+    setDraft({ status: '', dueDate: '' })
+  }
+
+  const saveEdit = async () => {
+    if (editingId === null) return
+    setSaving(true)
+    try {
+      await api.patch(`/api/invoices/${editingId}`, {
+        status: draft.status,
+        dueDate: draft.dueDate ? `${draft.dueDate}T00:00:00` : null,
+      })
+      cancelEdit()
+      load()
+    } catch (err) {
+      console.error(err)
+      alert('Failed to update invoice')
+    } finally {
+      setSaving(false)
+    }
+  }
 
   if (loading) return (
     <div className="flex items-center justify-center py-12">
@@ -56,6 +90,7 @@ export default function InvoiceListPage() {
               <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Amount</th>
               <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
               <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Due Date</th>
+              <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
@@ -65,13 +100,40 @@ export default function InvoiceListPage() {
                 <td className="px-4 py-3 font-medium text-gray-900">{inv.customerName}</td>
                 <td className="px-4 py-3 font-mono text-sm text-gray-900">${inv.totalAmount}</td>
                 <td className="px-4 py-3">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusBadge[inv.status] || 'bg-gray-100 text-gray-800'}`}>{inv.status}</span>
+                  {editingId === inv.id ? (
+                    <select value={draft.status} onChange={(e) => setDraft({ ...draft, status: e.target.value })} className={selectClass}>
+                      <option>PENDING</option><option>PAID</option><option>CANCELLED</option>
+                    </select>
+                  ) : (
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusBadge[inv.status] || 'bg-gray-100 text-gray-800'}`}>{inv.status}</span>
+                  )}
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-600">{inv.dueDate ? new Date(inv.dueDate).toLocaleDateString() : '—'}</td>
+                <td className="px-4 py-3 text-sm text-gray-600">
+                  {editingId === inv.id ? (
+                    <input type="date" value={draft.dueDate} onChange={(e) => setDraft({ ...draft, dueDate: e.target.value })} className={selectClass} />
+                  ) : (
+                    inv.dueDate ? new Date(inv.dueDate).toLocaleDateString() : '—'
+                  )}
+                </td>
+                <td className="px-4 py-3 text-right whitespace-nowrap">
+                  {editingId === inv.id ? (
+                    <div className="flex justify-end gap-2">
+                      <button onClick={saveEdit} disabled={saving} className="px-3 py-1.5 rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition disabled:opacity-50">
+                        {saving ? 'Saving...' : 'Save'}
+                      </button>
+                      <button onClick={cancelEdit} className="px-3 py-1.5 rounded-lg text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition">Cancel</button>
+                    </div>
+                  ) : (
+                    <button onClick={() => startEdit(inv)} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-blue-600 hover:bg-blue-50 transition">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                      Edit
+                    </button>
+                  )}
+                </td>
               </tr>
             ))}
             {invoices.length === 0 && (
-              <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-500">No invoices yet</td></tr>
+              <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-500">No invoices yet</td></tr>
             )}
           </tbody>
         </table>
