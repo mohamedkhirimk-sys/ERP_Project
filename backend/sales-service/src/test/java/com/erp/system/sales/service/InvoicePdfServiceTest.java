@@ -89,6 +89,16 @@ class InvoicePdfServiceTest {
                 "Total TTC $719.98",
                 "Informations additionnelles :",
                 "Service Après Vente : Garantie 1 an.",
+                "Coordonnées",
+                "Détails bancaires",
+                "Pierre Fournisseur",
+                "Téléphone : +33 4 92 99 99 99",
+                "E-mail : pierre@macompagnie.fr",
+                "Banque NP Paribas",
+                "IBAN FR23 4112 4098 4098 23",
+                "SWIFT/BIC FRHHCXX1001",
+                "N° Siren ou Siret : 1234567-8",
+                "N° TVA intra. : FRXX 999999999",
                 "Généré le :");
     }
 

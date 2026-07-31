@@ -156,6 +156,28 @@ public class InvoicePdfService {
             document.add(new Paragraph("Informations additionnelles :", boldFont));
             document.add(new Paragraph("Service Après Vente : Garantie 1 an.", greyFont));
             document.add(new Paragraph(" "));
+
+            PdfPTable footer = new PdfPTable(3);
+            footer.setWidths(new float[]{1f, 1f, 1f});
+            footer.setWidthPercentage(100f);
+            addCell(footer, "Mon Entreprise", boldFont, Element.ALIGN_LEFT);
+            addCell(footer, "Coordonnées", boldFont, Element.ALIGN_LEFT);
+            addCell(footer, "Détails bancaires", boldFont, Element.ALIGN_LEFT);
+            addCell(footer, "22, Avenue Voltaire", greyFont, Element.ALIGN_LEFT);
+            addCell(footer, "Pierre Fournisseur", greyFont, Element.ALIGN_LEFT);
+            addCell(footer, "Banque NP Paribas", greyFont, Element.ALIGN_LEFT);
+            addCell(footer, "13000 Marseille", greyFont, Element.ALIGN_LEFT);
+            addCell(footer, "Téléphone : +33 4 92 99 99 99", greyFont, Element.ALIGN_LEFT);
+            addCell(footer, "IBAN FR23 4112 4098 4098 23", greyFont, Element.ALIGN_LEFT);
+            addCell(footer, "N° Siren ou Siret : 1234567-8", greyFont, Element.ALIGN_LEFT);
+            addCell(footer, "E-mail : pierre@macompagnie.fr", greyFont, Element.ALIGN_LEFT);
+            addCell(footer, "SWIFT/BIC FRHHCXX1001", greyFont, Element.ALIGN_LEFT);
+            addCell(footer, "N° TVA intra. : FRXX 999999999", greyFont, Element.ALIGN_LEFT);
+            addCell(footer, "www. macompagnie.com", greyFont, Element.ALIGN_LEFT);
+            addCell(footer, "", greyFont, Element.ALIGN_LEFT);
+            document.add(footer);
+
+            document.add(new Paragraph(" "));
             document.add(new Paragraph("Généré le : " + LocalDateTime.now().format(DATE_FORMAT), greyFont));
         } catch (Exception e) {
             throw new RuntimeException("Failed to generate PDF for invoice " + invoiceId, e);
