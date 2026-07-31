@@ -12,19 +12,34 @@ add the footer "as in the invoice model".
 
 ## Design
 
-After the totals table (and before the "Généré le" line), add a footer block:
+### Existing block (kept)
+
+After the totals table:
 
 - **"Informations additionnelles :"** — bold, 10pt (same as section headings)
 - **"Service Après Vente : Garantie 1 an."** — grey, 8pt (same style as the "Généré le" line)
 
-Kept as a content block at the end of the document (matching the template), not a fixed
-page-position footer. Text is hardcoded like the seller placeholder ("Mon Entreprise"); real
-after-sales terms can replace it later.
+### New 3-column footer block (below the additional-info block)
+
+Full-width `PdfPTable(3)`, headers bold 10pt, data grey 8pt:
+
+| Mon Entreprise | Coordonnées | Détails bancaires |
+|---|---|---|
+| 22, Avenue Voltaire | Pierre Fournisseur | Banque NP Paribas |
+| 13000 Marseille | Téléphone : +33 4 92 99 99 99 | IBAN FR23 4112 4098 4098 23 |
+| N° Siren ou Siret : 1234567-8 | E-mail : pierre@macompagnie.fr | SWIFT/BIC FRHHCXX1001 |
+| N° TVA intra. : FRXX 999999999 | www. macompagnie.com | (empty) |
+
+The "Généré le" line remains last (grey, 8pt).
+
+Both blocks are content blocks at the end of the document (matching the template), not fixed
+page-position footers. All text is hardcoded like the seller placeholder ("Mon Entreprise");
+real company data can be configured later.
 
 ## Scope
 
-- `backend/sales-service/.../service/InvoicePdfService.java` — add the two paragraphs
-- `backend/sales-service/.../service/InvoicePdfServiceTest.java` — assert both strings in the
+- `backend/sales-service/.../service/InvoicePdfService.java` — add the footer paragraphs and table
+- `backend/sales-service/.../service/InvoicePdfServiceTest.java` — assert footer strings in the
   layout test
 
 ## Out of scope
