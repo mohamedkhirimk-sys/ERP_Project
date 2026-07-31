@@ -87,6 +87,8 @@ class InvoicePdfServiceTest {
                 "Total HT $599.98",
                 "Total TVA $120.00",
                 "Total TTC $719.98",
+                "Informations additionnelles :",
+                "Service Après Vente : Garantie 1 an.",
                 "Généré le :");
     }
 

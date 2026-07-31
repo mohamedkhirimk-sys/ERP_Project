@@ -153,6 +153,9 @@ public class InvoicePdfService {
             document.add(totals);
 
             document.add(new Paragraph(" "));
+            document.add(new Paragraph("Informations additionnelles :", boldFont));
+            document.add(new Paragraph("Service Après Vente : Garantie 1 an.", greyFont));
+            document.add(new Paragraph(" "));
             document.add(new Paragraph("Généré le : " + LocalDateTime.now().format(DATE_FORMAT), greyFont));
         } catch (Exception e) {
             throw new RuntimeException("Failed to generate PDF for invoice " + invoiceId, e);
