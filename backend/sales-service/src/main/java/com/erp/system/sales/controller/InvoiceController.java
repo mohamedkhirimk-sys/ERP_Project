@@ -4,13 +4,16 @@ import com.erp.system.sales.dto.InvoiceRequest;
 import com.erp.system.sales.dto.InvoiceResponse;
 import com.erp.system.sales.dto.OrderInvoiceRequest;
 import com.erp.system.sales.dto.UpdateInvoiceRequest;
+import com.erp.system.sales.service.InvoicePdfService;
 import com.erp.system.sales.service.InvoiceService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 public class InvoiceController {
 
     private final InvoiceService invoiceService;
+    private final InvoicePdfService invoicePdfService;
 
     @PostMapping
     public ResponseEntity<InvoiceResponse> createInvoice(@Valid @RequestBody InvoiceRequest request) {
@@ -40,6 +44,15 @@ public class InvoiceController {
     @GetMapping("/{id}")
     public ResponseEntity<InvoiceResponse> getInvoiceById(@PathVariable Long id) {
         return ResponseEntity.ok(invoiceService.getInvoiceById(id));
+    }
+
+    @GetMapping("/{id}/pdf")
+    public ResponseEntity<byte[]> getInvoicePdf(@PathVariable Long id) {
+        byte[] pdf = invoicePdfService.generatePdf(id);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"INV-" + id + ".pdf\"")
+                .body(pdf);
     }
 
     @GetMapping("/customer/{customerId}")
