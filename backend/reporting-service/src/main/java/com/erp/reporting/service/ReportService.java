@@ -134,12 +134,12 @@ public class ReportService {
         List<Map<String, Object>> accounts = fetchList("http://finance-service/api/accounts");
         List<Map<String, Object>> entries = fetchList("http://finance-service/api/journal-entries");
 
-        BigDecimal totalDebits = entries.stream()
-                .map(e -> new BigDecimal(e.get("debit").toString()))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal totalCredits = entries.stream()
-                .map(e -> new BigDecimal(e.get("credit").toString()))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        List<Map<String, Object>> lines = entries.stream()
+                .flatMap(e -> entryLines(e).stream())
+                .toList();
+
+        BigDecimal totalDebits = sum(lines, "debit");
+        BigDecimal totalCredits = sum(lines, "credit");
 
         FinancialReport.Summary summary = FinancialReport.Summary.builder()
                 .totalAccounts(accounts.size())
@@ -150,13 +150,13 @@ public class ReportService {
 
         List<FinancialReport.AccountBalance> trialBalance = accounts.stream().map(a -> {
             Long accountId = ((Number) a.get("id")).longValue();
-            BigDecimal debits = entries.stream()
-                    .filter(e -> ((Number) e.get("accountId")).longValue() == accountId)
-                    .map(e -> new BigDecimal(e.get("debit").toString()))
+            BigDecimal debits = lines.stream()
+                    .filter(l -> ((Number) l.get("accountId")).longValue() == accountId)
+                    .map(l -> new BigDecimal(l.get("debit").toString()))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
-            BigDecimal credits = entries.stream()
-                    .filter(e -> ((Number) e.get("accountId")).longValue() == accountId)
-                    .map(e -> new BigDecimal(e.get("credit").toString()))
+            BigDecimal credits = lines.stream()
+                    .filter(l -> ((Number) l.get("accountId")).longValue() == accountId)
+                    .map(l -> new BigDecimal(l.get("credit").toString()))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
             return FinancialReport.AccountBalance.builder()
                     .accountCode((String) a.get("accountCode"))
@@ -172,8 +172,8 @@ public class ReportService {
                 .map(e -> FinancialReport.JournalSummary.builder()
                         .entryNumber((String) e.get("entryNumber"))
                         .description((String) e.getOrDefault("description", ""))
-                        .debit(new BigDecimal(e.get("debit").toString()))
-                        .credit(new BigDecimal(e.get("credit").toString()))
+                        .debit(sum(entryLines(e), "debit"))
+                        .credit(sum(entryLines(e), "credit"))
                         .entryDate(LocalDate.parse(e.get("entryDate").toString().substring(0, 10)))
                         .build())
                 .sorted((a, b) -> b.getEntryDate().compareTo(a.getEntryDate()))
@@ -329,11 +329,45 @@ public class ReportService {
         return dash;
     }
 
+    private BigDecimal sum(List<Map<String, Object>> lines, String key) {
+        return lines.stream()
+                .map(l -> new BigDecimal(l.get(key).toString()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private List<Map<String, Object>> entryLines(Map<String, Object> entry) {
+        Object rawLines = entry.get("lines");
+        if (!(rawLines instanceof List<?> lines)) {
+            return List.of();
+        }
+        String entryNumber = (String) entry.get("entryNumber");
+        String description = (String) entry.getOrDefault("description", "");
+        String entryDate = entry.get("entryDate").toString();
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Object raw : lines) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> line = (Map<String, Object>) raw;
+            Map<String, Object> enriched = new HashMap<>(line);
+            enriched.put("entryNumber", entryNumber);
+            enriched.put("description", description);
+            enriched.put("entryDate", entryDate);
+            result.add(enriched);
+        }
+        return result;
+    }
+
     @SuppressWarnings("unchecked")
     private List<Map<String, Object>> fetchList(String url) {
         try {
-            return rest.exchange(url, HttpMethod.GET, null,
-                    new ParameterizedTypeReference<List<Map<String, Object>>>() {}).getBody();
+            Object body = rest.exchange(url, HttpMethod.GET, null,
+                    new ParameterizedTypeReference<Object>() {}).getBody();
+            if (body instanceof List<?> list) {
+                return list.stream().map(x -> (Map<String, Object>) x).toList();
+            }
+            if (body instanceof Map<?, ?> map && map.get("content") instanceof List<?> content) {
+                return content.stream().map(x -> (Map<String, Object>) x).toList();
+            }
+            return List.of();
         } catch (Exception e) {
             return List.of();
         }
