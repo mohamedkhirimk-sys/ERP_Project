@@ -23,7 +23,7 @@ import CreateGrnPage from '@/features/goods-received/CreateGrnPage'
 import CreatePurchaseOrderPage from '@/features/purchase-orders/CreatePurchaseOrderPage'
 import CreateInvoicePage from '@/features/invoices/CreateInvoicePage'
 import PayrollListPage from '@/features/payroll/PayrollListPage'
-import JournalEntryListPage from '@/features/journal/JournalEntryListPage'
+import AuxiliaryJournalsPage from '@/features/journal/AuxiliaryJournalsPage'
 import ReportsListPage from '@/features/reports/ReportsListPage'
 import SalesReportPage from '@/features/reports/SalesReportPage'
 import InventoryReportPage from '@/features/reports/InventoryReportPage'
@@ -58,7 +58,7 @@ export default function App() {
             <Route path="/accounts" element={<AccountListPage />} />
             <Route path="/accounts/new" element={<AccountFormPage />} />
             <Route path="/accounts/:id/edit" element={<AccountFormPage />} />
-            <Route path="/journal" element={<JournalEntryListPage />} />
+            <Route path="/journal" element={<AuxiliaryJournalsPage />} />
             <Route path="/journal/new" element={<CreateJournalEntryPage />} />
             <Route path="/treasury" element={<TreasuryPage />} />
             <Route path="/payroll" element={<PayrollListPage />} />
