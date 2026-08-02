@@ -16,6 +16,7 @@ import EmployeeFormPage from '@/features/employees/EmployeeFormPage'
 import AccountListPage from '@/features/accounts/AccountListPage'
 import AccountFormPage from '@/features/accounts/AccountFormPage'
 import CreateJournalEntryPage from '@/features/journal/CreateJournalEntryPage'
+import TreasuryPage from '@/features/treasury/TreasuryPage'
 import CreatePayrollPage from '@/features/payroll/CreatePayrollPage'
 import CreateOrderPage from '@/features/orders/CreateOrderPage'
 import CreateGrnPage from '@/features/goods-received/CreateGrnPage'
@@ -59,6 +60,7 @@ export default function App() {
             <Route path="/accounts/:id/edit" element={<AccountFormPage />} />
             <Route path="/journal" element={<JournalEntryListPage />} />
             <Route path="/journal/new" element={<CreateJournalEntryPage />} />
+            <Route path="/treasury" element={<TreasuryPage />} />
             <Route path="/payroll" element={<PayrollListPage />} />
             <Route path="/payroll/new" element={<CreatePayrollPage />} />
             <Route path="/reports" element={<ReportsListPage />} />
