@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/purchase-orders")
 @RequiredArgsConstructor
@@ -45,5 +47,10 @@ public class PurchaseOrderController {
     @PatchMapping("/{id}/status")
     public ResponseEntity<PurchaseOrderResponse> updatePurchaseOrderStatus(@PathVariable Long id, @RequestParam String status) {
         return ResponseEntity.ok(purchaseOrderService.updatePurchaseOrderStatus(id, status));
+    }
+
+    @PostMapping("/accounting-backfill")
+    public ResponseEntity<Map<String, Object>> backfillAccounting() {
+        return ResponseEntity.ok(purchaseOrderService.backfillAccounting());
     }
 }
