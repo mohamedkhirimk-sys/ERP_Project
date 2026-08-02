@@ -16,3 +16,28 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://${EUREKA_HOST:localhost}:${EUREKA_PORT:8761}/eureka/
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: identity-service
+        url: /identity-service/v3/api-docs
+      - name: inventory-service
+        url: /inventory-service/v3/api-docs
+      - name: order-service
+        url: /order-service/v3/api-docs
+      - name: payment-service
+        url: /payment-service/v3/api-docs
+      - name: product-service
+        url: /product-service/v3/api-docs
+      - name: sales-service
+        url: /sales-service/v3/api-docs
+      - name: hrm-service
+        url: /hrm-service/v3/api-docs
+      - name: finance-service
+        url: /finance-service/v3/api-docs
+      - name: procurement-service
+        url: /procurement-service/v3/api-docs
+      - name: reporting-service
+        url: /reporting-service/v3/api-docs

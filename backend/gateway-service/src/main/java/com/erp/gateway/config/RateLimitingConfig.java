@@ -174,6 +174,46 @@ public class RateLimitingConfig {
                         .path("/api/reports/**")
                         .filters(f -> f.requestRateLimiter(c -> c.setRateLimiter(rateLimiter).setKeyResolver(ipKeyResolver)))
                         .uri("lb://reporting-service"))
+                .route("identity-docs-route", r -> r
+                        .path("/identity-service/v3/api-docs")
+                        .filters(f -> f.rewritePath("/identity-service/v3/api-docs", "/v3/api-docs"))
+                        .uri("lb://identity-service"))
+                .route("inventory-docs-route", r -> r
+                        .path("/inventory-service/v3/api-docs")
+                        .filters(f -> f.rewritePath("/inventory-service/v3/api-docs", "/v3/api-docs"))
+                        .uri("lb://inventory-service"))
+                .route("order-docs-route", r -> r
+                        .path("/order-service/v3/api-docs")
+                        .filters(f -> f.rewritePath("/order-service/v3/api-docs", "/v3/api-docs"))
+                        .uri("lb://order-service"))
+                .route("payment-docs-route", r -> r
+                        .path("/payment-service/v3/api-docs")
+                        .filters(f -> f.rewritePath("/payment-service/v3/api-docs", "/v3/api-docs"))
+                        .uri("lb://payment-service"))
+                .route("product-docs-route", r -> r
+                        .path("/product-service/v3/api-docs")
+                        .filters(f -> f.rewritePath("/product-service/v3/api-docs", "/v3/api-docs"))
+                        .uri("lb://product-service"))
+                .route("sales-docs-route", r -> r
+                        .path("/sales-service/v3/api-docs")
+                        .filters(f -> f.rewritePath("/sales-service/v3/api-docs", "/v3/api-docs"))
+                        .uri("lb://sales-service"))
+                .route("hrm-docs-route", r -> r
+                        .path("/hrm-service/v3/api-docs")
+                        .filters(f -> f.rewritePath("/hrm-service/v3/api-docs", "/v3/api-docs"))
+                        .uri("lb://hrm-service"))
+                .route("finance-docs-route", r -> r
+                        .path("/finance-service/v3/api-docs")
+                        .filters(f -> f.rewritePath("/finance-service/v3/api-docs", "/v3/api-docs"))
+                        .uri("lb://finance-service"))
+                .route("procurement-docs-route", r -> r
+                        .path("/procurement-service/v3/api-docs")
+                        .filters(f -> f.rewritePath("/procurement-service/v3/api-docs", "/v3/api-docs"))
+                        .uri("lb://procurement-service"))
+                .route("reporting-docs-route", r -> r
+                        .path("/reporting-service/v3/api-docs")
+                        .filters(f -> f.rewritePath("/reporting-service/v3/api-docs", "/v3/api-docs"))
+                        .uri("lb://reporting-service"))
                 .build();
     }
 }
