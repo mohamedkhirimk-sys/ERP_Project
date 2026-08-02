@@ -1,19 +1,44 @@
-import { useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
 import api from '@/lib/axios'
 
 const inputClass = 'w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition'
 
+const journals = [
+  { code: 'VTE', label: 'Journal des ventes' },
+  { code: 'ENC', label: 'Journal des encaissements' },
+  { code: 'ACH', label: 'Journal des achats' },
+  { code: 'DEC', label: 'Journal des décaissements' },
+  { code: 'BNQ', label: 'Journal de banque' },
+  { code: 'OD', label: 'Journal des opérations diverses' },
+]
+
+interface Account {
+  id: number
+  accountCode: string
+  accountName: string
+}
+
 interface LineItem {
-  accountCode: string; description: string; debit: string; credit: string
+  accountId: string
+  debit: string
+  credit: string
 }
 
 export default function CreateJournalEntryPage() {
   const navigate = useNavigate()
-  const [entryDate, setEntryDate] = useState(new Date().toISOString().split('T')[0])
+  const [journalCode, setJournalCode] = useState('OD')
   const [description, setDescription] = useState('')
-  const [lines, setLines] = useState<LineItem[]>([{ accountCode: '', description: '', debit: '', credit: '' }])
+  const [accounts, setAccounts] = useState<Account[]>([])
+  const [lines, setLines] = useState<LineItem[]>([{ accountId: '', debit: '', credit: '' }])
   const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    api.get('/api/accounts')
+      .then((res) => setAccounts(res.data.content || res.data))
+      .catch(console.error)
+  }, [])
 
   const totalDebit = lines.reduce((s, l) => s + (Number(l.debit) || 0), 0)
   const totalCredit = lines.reduce((s, l) => s + (Number(l.credit) || 0), 0)
@@ -25,28 +50,30 @@ export default function CreateJournalEntryPage() {
     setLines(updated)
   }
 
-  const addLine = () => setLines([...lines, { accountCode: '', description: '', debit: '', credit: '' }])
+  const addLine = () => setLines([...lines, { accountId: '', debit: '', credit: '' }])
   const removeLine = (index: number) => lines.length > 1 && setLines(lines.filter((_, i) => i !== index))
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     if (!isBalanced) { alert('Debit and Credit must be equal'); return }
     setSaving(true)
     try {
       await api.post('/api/journal-entries', {
-        entryDate,
         description,
-        lines: lines.filter((l) => l.accountCode.trim()).map((l) => ({
-          accountCode: l.accountCode,
-          description: l.description,
+        journalCode,
+        lines: lines.filter((l) => l.accountId.trim()).map((l) => ({
+          accountId: Number(l.accountId),
           debit: Number(l.debit) || 0,
           credit: Number(l.credit) || 0,
         })),
       })
       navigate('/journal')
     } catch (err) {
-      console.error(err)
-      alert('Failed to create journal entry')
+      const message =
+        axios.isAxiosError(err) && typeof err.response?.data === 'string'
+          ? err.response.data
+          : 'Failed to create journal entry'
+      alert(message)
     } finally {
       setSaving(false)
     }
@@ -67,8 +94,10 @@ export default function CreateJournalEntryPage() {
       <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-6">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Entry Date</label>
-            <input type="date" value={entryDate} onChange={(e) => setEntryDate(e.target.value)} className={inputClass} required />
+            <label className="block text-sm font-medium text-gray-700 mb-1">Journal</label>
+            <select value={journalCode} onChange={(e) => setJournalCode(e.target.value)} className={inputClass}>
+              {journals.map((j) => <option key={j.code} value={j.code}>{j.code} — {j.label}</option>)}
+            </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
@@ -88,8 +117,7 @@ export default function CreateJournalEntryPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-100">
-                  <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Account Code</th>
-                  <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Description</th>
+                  <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Account</th>
                   <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">Debit</th>
                   <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">Credit</th>
                   <th className="px-3 py-2 w-10"></th>
@@ -99,10 +127,10 @@ export default function CreateJournalEntryPage() {
                 {lines.map((line, i) => (
                   <tr key={i}>
                     <td className="px-3 py-1.5">
-                      <input value={line.accountCode} onChange={(e) => updateLine(i, 'accountCode', e.target.value)} className={inputClass} placeholder="e.g. 1000" required />
-                    </td>
-                    <td className="px-3 py-1.5">
-                      <input value={line.description} onChange={(e) => updateLine(i, 'description', e.target.value)} className={inputClass} placeholder="Line description" />
+                      <select value={line.accountId} onChange={(e) => updateLine(i, 'accountId', e.target.value)} className={inputClass} required>
+                        <option value="">Select account...</option>
+                        {accounts.map((a) => <option key={a.id} value={a.id}>{a.accountCode} — {a.accountName}</option>)}
+                      </select>
                     </td>
                     <td className="px-3 py-1.5">
                       <input type="number" step="0.01" value={line.debit} onChange={(e) => updateLine(i, 'debit', e.target.value)} className={`${inputClass} text-right w-32`} placeholder="0.00" />
@@ -120,7 +148,7 @@ export default function CreateJournalEntryPage() {
               </tbody>
               <tfoot>
                 <tr className="border-t border-gray-200 bg-gray-100">
-                  <td colSpan={2} className="px-3 py-2 text-right text-sm font-semibold text-gray-700">Totals</td>
+                  <td className="px-3 py-2 text-right text-sm font-semibold text-gray-700">Totals</td>
                   <td className={`px-3 py-2 text-right font-mono text-sm font-semibold ${totalDebit > 0 ? (isBalanced ? 'text-green-600' : 'text-red-600') : 'text-gray-700'}`}>
                     ${totalDebit.toFixed(2)}
                   </td>
@@ -132,7 +160,7 @@ export default function CreateJournalEntryPage() {
               </tfoot>
             </table>
           </div>
-          {!isBalanced && lines.some((l) => l.accountCode.trim()) && (
+          {!isBalanced && lines.some((l) => l.accountId.trim()) && (
             <p className="flex items-center gap-1 text-red-600 text-sm mt-2">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               Debits and credits must be equal
