@@ -1,5 +1,6 @@
 package com.erp.system.order.service;
 
+import com.erp.system.order.client.AccountingClient;
 import com.erp.system.order.client.InventoryClient;
 import com.erp.system.order.client.PaymentClient;
 import com.erp.system.order.client.SalesClient;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +28,7 @@ public class OrderService {
     private final InventoryClient inventoryClient;
     private final PaymentClient paymentClient;
     private final SalesClient salesClient;
+    private final AccountingClient accountingClient;
 
     @Transactional
     public OrderResponse createOrder(OrderRequest request) {
@@ -77,7 +80,20 @@ public class OrderService {
             }
 
             saved.setStatus("CONFIRMED");
-            return toResponse(orderRepository.save(saved));
+            OrderResponse response = toResponse(orderRepository.save(saved));
+
+            try {
+                accountingClient.post(AccountingPostingRequest.builder()
+                        .sourceType("ORDER_CONFIRMED")
+                        .sourceId(saved.getOrderNumber())
+                        .customerName(saved.getCustomerName())
+                        .totalAmount(saved.getTotalAmount())
+                        .build());
+            } catch (Exception e) {
+                log.error("Failed to post accounting entry for order {} (customer {}, amount {}): {}",
+                        saved.getOrderNumber(), saved.getCustomerName(), saved.getTotalAmount(), e.getMessage());
+            }
+            return response;
         } catch (Exception e) {
             for (var itemReq : request.getItems()) {
                 inventoryClient.deductStock(itemReq.getProductSku(), itemReq.getQuantity());
@@ -92,6 +108,28 @@ public class OrderService {
     public Page<OrderResponse> getAllOrders(Pageable pageable) {
         return orderRepository.findAll(pageable)
                 .map(this::toResponse);
+    }
+
+    public Map<String, Object> backfillAccounting() {
+        List<OrderEntity> confirmed = orderRepository.findAll().stream()
+                .filter(o -> "CONFIRMED".equalsIgnoreCase(o.getStatus()))
+                .toList();
+        int created = 0;
+        for (OrderEntity o : confirmed) {
+            try {
+                accountingClient.post(AccountingPostingRequest.builder()
+                        .sourceType("ORDER_CONFIRMED")
+                        .sourceId(o.getOrderNumber())
+                        .customerName(o.getCustomerName())
+                        .totalAmount(o.getTotalAmount())
+                        .build());
+                created++;
+            } catch (Exception e) {
+                log.error("Failed to post accounting entry for order {} (customer {}, amount {}): {}",
+                        o.getOrderNumber(), o.getCustomerName(), o.getTotalAmount(), e.getMessage());
+            }
+        }
+        return Map.of("processed", confirmed.size(), "created", created);
     }
 
     private OrderResponse toResponse(OrderEntity entity) {

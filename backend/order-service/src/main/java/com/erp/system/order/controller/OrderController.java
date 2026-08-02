@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/orders")
 @RequiredArgsConstructor
@@ -28,5 +30,10 @@ public class OrderController {
     public ResponseEntity<Page<OrderResponse>> getAllOrders(
             @PageableDefault(size = 20) Pageable pageable) {
         return ResponseEntity.ok(orderService.getAllOrders(pageable));
+    }
+
+    @PostMapping("/accounting-backfill")
+    public ResponseEntity<Map<String, Object>> backfillAccounting() {
+        return ResponseEntity.ok(orderService.backfillAccounting());
     }
 }
