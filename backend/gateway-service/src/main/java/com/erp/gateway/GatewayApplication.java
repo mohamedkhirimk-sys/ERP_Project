@@ -12,7 +12,7 @@ import org.springframework.boot.actuate.autoconfigure.security.reactive.Reactive
 import org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration;
 
 @SpringBootApplication(
-    scanBasePackages = {"com.erp", "com.erp.system"},
+    scanBasePackages = {"com.erp.gateway", "com.erp.system"},
     exclude = {
         DataSourceAutoConfiguration.class,
         HibernateJpaAutoConfiguration.class,
