@@ -290,7 +290,7 @@ In `PurchaseOrderServiceImpl.java`:
     }
 ```
 
-(needs `import java.util.List;` — already present in the file.)
+(needs `import java.util.List;` — NOT present in the file; add it with the other imports in 4(a).)
 
 - [ ] **Step 5: Add the controller endpoint**
 
