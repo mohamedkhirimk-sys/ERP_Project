@@ -44,7 +44,6 @@ export default function AuxiliaryJournalsPage() {
   const [loading, setLoading] = useState(true)
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
-  const [expanded, setExpanded] = useState<number | null>(null)
 
   useEffect(() => {
     api.get('/api/journals')
@@ -126,36 +125,33 @@ export default function AuxiliaryJournalsPage() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {detail?.entries.map((e) => {
-                const isOpen = expanded === e.id
                 const totalDebit = e.lines.reduce((s, l) => s + l.debit, 0)
                 const totalCredit = e.lines.reduce((s, l) => s + l.credit, 0)
                 return (
                   <Fragment key={e.id}>
-                    <tr onClick={() => setExpanded(isOpen ? null : e.id)} className="hover:bg-gray-50 transition cursor-pointer">
+                    <tr>
                       <td className="px-4 py-3 font-mono text-sm text-gray-600">{e.entryNumber}</td>
                       <td className="px-4 py-3 text-sm text-gray-600">{new Date(e.entryDate).toLocaleString()}</td>
                       <td className="px-4 py-3 text-sm text-gray-900">{e.description}</td>
                       <td className="px-4 py-3 font-mono text-sm text-gray-900 text-right">{totalDebit > 0 ? `$${totalDebit.toFixed(2)}` : '—'}</td>
                       <td className="px-4 py-3 font-mono text-sm text-gray-900 text-right">{totalCredit > 0 ? `$${totalCredit.toFixed(2)}` : '—'}</td>
                     </tr>
-                    {isOpen && (
-                      <tr>
-                        <td colSpan={5} className="px-6 pb-3 bg-gray-50/50">
-                          <table className="w-full text-sm">
-                            <tbody className="divide-y divide-gray-100">
-                              {e.lines.map((l) => (
-                                <tr key={l.id}>
-                                  <td className="py-1.5 px-2 font-mono text-gray-600 w-32">{l.accountCode}</td>
-                                  <td className="py-1.5 px-2 text-gray-700">{l.accountName}</td>
-                                  <td className="py-1.5 px-2 font-mono text-right w-32">{l.debit > 0 ? `$${l.debit.toFixed(2)}` : '—'}</td>
-                                  <td className="py-1.5 px-2 font-mono text-right w-32">{l.credit > 0 ? `$${l.credit.toFixed(2)}` : '—'}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </td>
-                      </tr>
-                    )}
+                    <tr>
+                      <td colSpan={5} className="px-6 pb-3 bg-gray-50/50">
+                        <table className="w-full text-sm">
+                          <tbody className="divide-y divide-gray-100">
+                            {e.lines.map((l) => (
+                              <tr key={l.id}>
+                                <td className="py-1.5 px-2 font-mono text-gray-600 w-32">{l.accountCode}</td>
+                                <td className="py-1.5 px-2 text-gray-700">{l.accountName}</td>
+                                <td className="py-1.5 px-2 font-mono text-right w-32">{l.debit > 0 ? `$${l.debit.toFixed(2)}` : '—'}</td>
+                                <td className="py-1.5 px-2 font-mono text-right w-32">{l.credit > 0 ? `$${l.credit.toFixed(2)}` : '—'}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>
                   </Fragment>
                 )
               })}
