@@ -47,6 +47,8 @@ export default function TrialBalanceTab() {
               <tr className="border-b border-gray-200 bg-gray-50 text-left">
                 <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Account</th>
                 <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Type</th>
+                <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Total Debits</th>
+                <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Total Credits</th>
                 <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Balance DR</th>
                 <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Balance CR</th>
               </tr>
@@ -56,6 +58,8 @@ export default function TrialBalanceTab() {
                 <tr key={a.accountCode} className="hover:bg-gray-50 transition">
                   <td className="px-4 py-3"><span className="font-mono text-sm text-gray-600">{a.accountCode}</span><span className="ml-2 text-sm font-medium text-gray-900">{a.accountName}</span></td>
                   <td className="px-4 py-3"><span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${typeColors[a.accountType] || 'bg-gray-100 text-gray-800'}`}>{a.accountType}</span></td>
+                  <td className="px-4 py-3 font-mono text-sm text-gray-900">${a.totalDebits.toLocaleString()}</td>
+                  <td className="px-4 py-3 font-mono text-sm text-gray-900">${a.totalCredits.toLocaleString()}</td>
                   <td className="px-4 py-3 font-mono text-sm text-gray-900">{a.balance > 0 ? `$${a.balance.toLocaleString()}` : '—'}</td>
                   <td className="px-4 py-3 font-mono text-sm text-gray-900">{a.balance < 0 ? `$${Math.abs(a.balance).toLocaleString()}` : '—'}</td>
                 </tr>
@@ -64,6 +68,8 @@ export default function TrialBalanceTab() {
             <tfoot>
               <tr className="border-t border-gray-200 bg-gray-50">
                 <td colSpan={2} className="px-4 py-3 text-sm font-semibold text-gray-700">Total</td>
+                <td className="px-4 py-3 font-mono text-sm font-semibold text-gray-900">${summary.totalDebits.toLocaleString()}</td>
+                <td className="px-4 py-3 font-mono text-sm font-semibold text-gray-900">${summary.totalCredits.toLocaleString()}</td>
                 <td className="px-4 py-3 font-mono text-sm font-semibold text-gray-900">${totalBalanceDr.toLocaleString()}</td>
                 <td className="px-4 py-3 font-mono text-sm font-semibold text-gray-900">${totalBalanceCr.toLocaleString()}</td>
               </tr>
