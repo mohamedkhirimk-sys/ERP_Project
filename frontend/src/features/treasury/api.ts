@@ -19,6 +19,7 @@ export interface BankBalance {
 
 export interface TreasuryPosition {
   banks: BankBalance[]
+  vaultBalance: number
   total: number
 }
 

@@ -48,20 +48,21 @@ export default function OperationsTab({ banks, refresh }: { banks: BankAccount[]
     setSubmitting(true)
     try {
       const desc = description || null
+      let movement: { id: number }
       if (type === 'Transfer') {
         if (!fromBank || !toBank) throw new Error('Select both banks')
-        await createTransfer({ fromBankAccountId: Number(fromBank), toBankAccountId: Number(toBank), amount: amountNum, description: desc })
+        movement = await createTransfer({ fromBankAccountId: Number(fromBank), toBankAccountId: Number(toBank), amount: amountNum, description: desc })
       } else if (type === 'Expense') {
         if (!bankId || !expenseAccountId) throw new Error('Select a bank and an expense account')
-        await createExpense({ bankAccountId: Number(bankId), expenseAccountId: Number(expenseAccountId), amount: amountNum, description: desc })
+        movement = await createExpense({ bankAccountId: Number(bankId), expenseAccountId: Number(expenseAccountId), amount: amountNum, description: desc })
       } else if (type === 'Deposit') {
         if (!bankId) throw new Error('Select a bank')
-        await createDeposit({ bankAccountId: Number(bankId), amount: amountNum, description: desc })
+        movement = await createDeposit({ bankAccountId: Number(bankId), amount: amountNum, description: desc })
       } else {
         if (!bankId) throw new Error('Select a bank')
-        await createWithdrawal({ bankAccountId: Number(bankId), amount: amountNum, description: desc })
+        movement = await createWithdrawal({ bankAccountId: Number(bankId), amount: amountNum, description: desc })
       }
-      setSuccess(`${type} of $${amountNum.toFixed(2)} recorded`)
+      setSuccess(`${type} #${movement.id} of $${amountNum.toFixed(2)} recorded`)
       setAmount('')
       setDescription('')
       refresh()
