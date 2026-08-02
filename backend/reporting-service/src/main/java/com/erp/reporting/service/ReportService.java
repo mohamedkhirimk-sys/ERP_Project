@@ -184,6 +184,77 @@ public class ReportService {
     }
 
     // ──────────────────────────────────────
+    //  Balance Sheet & Income Statement
+    // ──────────────────────────────────────
+
+    public BalanceSheetResponse balanceSheet() {
+        List<Map<String, Object>> accounts = fetchList("http://finance-service/api/accounts");
+        List<AccountLine> assets = lines(accounts, "ASSET");
+        List<AccountLine> liabilities = lines(accounts, "LIABILITY");
+        List<AccountLine> equity = lines(accounts, "EQUITY");
+        BigDecimal netIncome = netIncome(accounts);
+        BigDecimal totalAssets = sumLines(assets);
+        BigDecimal totalLiabilities = sumLines(liabilities);
+        BigDecimal totalEquity = sumLines(equity);
+        return BalanceSheetResponse.builder()
+                .assets(assets)
+                .liabilities(liabilities)
+                .equity(equity)
+                .netIncome(netIncome)
+                .totalAssets(totalAssets)
+                .totalLiabilities(totalLiabilities)
+                .totalEquity(totalEquity)
+                .totalLiabilitiesEquity(totalLiabilities.add(totalEquity).add(netIncome))
+                .build();
+    }
+
+    public IncomeStatementResponse incomeStatement() {
+        List<Map<String, Object>> accounts = fetchList("http://finance-service/api/accounts");
+        List<AccountLine> revenue = lines(accounts, "REVENUE");
+        List<AccountLine> expenses = lines(accounts, "EXPENSE");
+        BigDecimal totalRevenue = sumLines(revenue);
+        BigDecimal totalExpenses = sumLines(expenses);
+        return IncomeStatementResponse.builder()
+                .revenue(revenue)
+                .expenses(expenses)
+                .totalRevenue(totalRevenue)
+                .totalExpenses(totalExpenses)
+                .netIncome(totalRevenue.subtract(totalExpenses))
+                .build();
+    }
+
+    private BigDecimal netIncome(List<Map<String, Object>> accounts) {
+        BigDecimal revenue = accounts.stream()
+                .filter(a -> "REVENUE".equals(a.get("accountType")))
+                .map(a -> new BigDecimal(a.get("balance").toString()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal expenses = accounts.stream()
+                .filter(a -> "EXPENSE".equals(a.get("accountType")))
+                .map(a -> new BigDecimal(a.get("balance").toString()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return revenue.negate().subtract(expenses);
+    }
+
+    private List<AccountLine> lines(List<Map<String, Object>> accounts, String type) {
+        return accounts.stream()
+                .filter(a -> type.equals(a.get("accountType")))
+                .filter(a -> new BigDecimal(a.get("balance").toString()).abs().signum() != 0)
+                .map(a -> AccountLine.builder()
+                        .accountCode((String) a.get("accountCode"))
+                        .accountName((String) a.get("accountName"))
+                        .balance(new BigDecimal(a.get("balance").toString()).abs())
+                        .build())
+                .sorted(Comparator.comparing(AccountLine::getAccountCode))
+                .toList();
+    }
+
+    private BigDecimal sumLines(List<AccountLine> lines) {
+        return lines.stream()
+                .map(AccountLine::getBalance)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    // ──────────────────────────────────────
     //  HR Report
     // ──────────────────────────────────────
 
