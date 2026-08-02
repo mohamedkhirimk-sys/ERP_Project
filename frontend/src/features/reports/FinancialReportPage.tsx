@@ -69,6 +69,13 @@ export default function FinancialReportPage() {
                 </tr>
               ))}
             </tbody>
+            <tfoot>
+              <tr className="border-t border-gray-200 bg-gray-50">
+                <td colSpan={2} className="px-4 py-3 text-sm font-semibold text-gray-700">Total</td>
+                <td className="px-4 py-3 font-mono text-sm font-semibold text-gray-900">${summary.totalDebits.toLocaleString()}</td>
+                <td className="px-4 py-3 font-mono text-sm font-semibold text-gray-900">${summary.totalCredits.toLocaleString()}</td>
+              </tr>
+            </tfoot>
           </table>
         </div>
 
