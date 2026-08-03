@@ -6,6 +6,7 @@ import com.erp.system.payment.dto.PaymentRequest;
 import com.erp.system.payment.dto.PaymentResponse;
 import com.erp.system.payment.entity.PaymentEntity;
 import com.erp.system.payment.entity.PaymentStatus;
+import com.erp.system.payment.exception.PaymentProcessingException;
 import com.erp.system.payment.repository.PaymentRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -89,6 +90,39 @@ class PaymentServiceTest {
                 .orderId("ORD-1")
                 .amount(new BigDecimal("100.00"))
                 .paymentMethod("CARD")
+                .idempotencyKey("KEY-1")
+                .build();
+    }
+
+    @Test
+    void processPaymentRejectsInvalidAmount() {
+        PaymentService service = new PaymentService(paymentRepository, eventPublisher, accountingClient);
+
+        assertThatCode(() -> service.processPayment(invalidRequest(new BigDecimal("0.00"), "CARD")))
+                .isInstanceOf(PaymentProcessingException.class)
+                .hasMessageContaining("Invalid amount");
+
+        verify(paymentRepository, never()).save(any());
+        verify(accountingClient, never()).post(any());
+    }
+
+    @Test
+    void processPaymentRejectsInvalidPaymentMethod() {
+        PaymentService service = new PaymentService(paymentRepository, eventPublisher, accountingClient);
+
+        assertThatCode(() -> service.processPayment(invalidRequest(new BigDecimal("100.00"), "INVALID")))
+                .isInstanceOf(PaymentProcessingException.class)
+                .hasMessageContaining("Invalid payment method");
+
+        verify(paymentRepository, never()).save(any());
+        verify(accountingClient, never()).post(any());
+    }
+
+    private PaymentRequest invalidRequest(BigDecimal amount, String paymentMethod) {
+        return PaymentRequest.builder()
+                .orderId("ORD-1")
+                .amount(amount)
+                .paymentMethod(paymentMethod)
                 .idempotencyKey("KEY-1")
                 .build();
     }
