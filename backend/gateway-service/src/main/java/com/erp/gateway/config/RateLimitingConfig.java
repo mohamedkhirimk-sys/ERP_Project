@@ -158,6 +158,18 @@ public class RateLimitingConfig {
                         .path("/api/payroll/**")
                         .filters(f -> f.requestRateLimiter(c -> c.setRateLimiter(rateLimiter).setKeyResolver(ipKeyResolver)))
                         .uri("lb://finance-service"))
+                .route("finance-journals-route", r -> r
+                        .path("/api/journals/**")
+                        .filters(f -> f.requestRateLimiter(c -> c.setRateLimiter(rateLimiter).setKeyResolver(ipKeyResolver)))
+                        .uri("lb://finance-service"))
+                .route("finance-bank-accounts-route", r -> r
+                        .path("/api/bank-accounts/**")
+                        .filters(f -> f.requestRateLimiter(c -> c.setRateLimiter(rateLimiter).setKeyResolver(ipKeyResolver)))
+                        .uri("lb://finance-service"))
+                .route("finance-treasury-route", r -> r
+                        .path("/api/treasury/**")
+                        .filters(f -> f.requestRateLimiter(c -> c.setRateLimiter(rateLimiter).setKeyResolver(ipKeyResolver)))
+                        .uri("lb://finance-service"))
                 .route("procurement-vendors-route", r -> r
                         .path("/api/vendors/**")
                         .filters(f -> f.requestRateLimiter(c -> c.setRateLimiter(rateLimiter).setKeyResolver(ipKeyResolver)))

@@ -8,7 +8,8 @@ import java.util.List;
 import com.erp.common.audit.Auditable;
 
 @Entity
-@Table(name = "journal_entries")
+@Table(name = "journal_entries",
+       uniqueConstraints = @UniqueConstraint(name = "uk_journal_entry_source", columnNames = {"sourceType", "sourceId"}))
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class JournalEntry extends Auditable {
 
@@ -21,6 +22,12 @@ public class JournalEntry extends Auditable {
 
     @Column(nullable = false)
     private String description;
+
+    private String sourceType;
+
+    private String sourceId;
+
+    private String journalCode;
 
     private LocalDateTime entryDate;
 

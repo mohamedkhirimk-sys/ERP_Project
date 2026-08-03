@@ -19,12 +19,17 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JournalEntryServiceImpl implements JournalEntryService {
 
+    private static final String DEFAULT_JOURNAL_CODE = "OD";
+
     private final JournalEntryRepository journalEntryRepository;
     private final AccountRepository accountRepository;
 
     @Override
     @Transactional
     public JournalEntryResponse createEntry(JournalEntryRequest request) {
+        String journalCode = request.getJournalCode() == null || request.getJournalCode().isBlank()
+                ? DEFAULT_JOURNAL_CODE
+                : JournalCode.fromString(request.getJournalCode()).name();
         List<JournalEntryLine> lines = request.getLines().stream()
                 .map(lineReq -> {
                     Account account = accountRepository.findById(lineReq.getAccountId())
@@ -42,6 +47,7 @@ public class JournalEntryServiceImpl implements JournalEntryService {
 
         JournalEntry entry = JournalEntry.builder()
                 .description(request.getDescription())
+                .journalCode(journalCode)
                 .lines(lines)
                 .build();
 

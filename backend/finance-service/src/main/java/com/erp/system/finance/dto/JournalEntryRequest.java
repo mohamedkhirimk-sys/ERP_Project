@@ -8,6 +8,8 @@ import java.util.List;
 public class JournalEntryRequest {
     @NotBlank private String description;
 
+    private String journalCode;
+
     @NotEmpty(message = "At least one line is required")
     private List<JournalEntryLineRequest> lines;
 }

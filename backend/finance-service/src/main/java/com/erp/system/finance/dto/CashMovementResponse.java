@@ -1,16 +1,25 @@
 package com.erp.system.finance.dto;
 
 import lombok.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data @Builder @NoArgsConstructor @AllArgsConstructor
-public class JournalEntryResponse {
+public class CashMovementResponse {
     private Long id;
-    private String entryNumber;
+
+    private String movementType;
+
+    private Long bankAccountId;
+
+    private Long toBankAccountId;
+
+    private BigDecimal amount;
+
     private String description;
-    private String journalCode;
-    private LocalDateTime entryDate;
+
+    private Long entryId;
+
     private LocalDateTime createdAt;
-    private List<JournalEntryLineResponse> lines;
 }

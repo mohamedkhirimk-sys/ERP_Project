@@ -36,4 +36,9 @@ public class JournalEntryController {
             @PageableDefault(size = 20) Pageable pageable) {
         return ResponseEntity.ok(journalEntryService.getEntriesByAccount(accountId, pageable));
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleBadRequest(IllegalArgumentException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
 }
