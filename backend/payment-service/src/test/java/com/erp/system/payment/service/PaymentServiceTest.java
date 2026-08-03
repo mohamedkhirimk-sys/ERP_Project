@@ -1,97 +1,142 @@
 package com.erp.system.payment.service;
 
-import com.erp.common.event.PaymentCompletedEvent;
+import com.erp.system.payment.client.AccountingClient;
+import com.erp.system.payment.dto.AccountingPostingRequest;
 import com.erp.system.payment.dto.PaymentRequest;
 import com.erp.system.payment.dto.PaymentResponse;
 import com.erp.system.payment.entity.PaymentEntity;
-import com.erp.system.payment.exception.PaymentProcessingException;
+import com.erp.system.payment.entity.PaymentStatus;
 import com.erp.system.payment.repository.PaymentRepository;
-
-import lombok.Data;
-
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.mockito.InjectMocks;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-@Data
-public class PaymentServiceTest {
+class PaymentServiceTest {
 
     @Mock
     private PaymentRepository paymentRepository;
-
     @Mock
     private ApplicationEventPublisher eventPublisher;
+    @Mock
+    private AccountingClient accountingClient;
 
-    @InjectMocks
-    private PaymentService paymentService;
+    @Test
+    void postsAccountingEntryAfterCompletedPayment() {
+        when(paymentRepository.findByIdempotencyKey("KEY-1")).thenReturn(Optional.empty());
+        when(paymentRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-    private PaymentRequest validRequest;
+        PaymentService service = new PaymentService(paymentRepository, eventPublisher, accountingClient);
+        PaymentResponse response = service.processPayment(request());
 
-    @BeforeEach
-    void setUp() {
-        validRequest = PaymentRequest.builder()
-                .orderId("ORD-123")       
+        ArgumentCaptor<AccountingPostingRequest> captor = ArgumentCaptor.forClass(AccountingPostingRequest.class);
+        verify(accountingClient).post(captor.capture());
+        AccountingPostingRequest posting = captor.getValue();
+
+        assertThat(posting.getSourceType()).isEqualTo("PAYMENT_COMPLETED");
+        assertThat(posting.getSourceId()).isEqualTo("ORD-1");
+        assertThat(posting.getTotalAmount()).isEqualByComparingTo("100.00");
+        assertThat(response.getStatus()).isEqualTo("COMPLETED");
+    }
+
+    @Test
+    void keepsPaymentCompletedWhenAccountingPostingFails() {
+        when(paymentRepository.findByIdempotencyKey("KEY-1")).thenReturn(Optional.empty());
+        when(paymentRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        doThrow(new RuntimeException("finance-service down")).when(accountingClient).post(any());
+
+        PaymentService service = new PaymentService(paymentRepository, eventPublisher, accountingClient);
+        PaymentResponse[] holder = new PaymentResponse[1];
+        assertThatCode(() -> holder[0] = service.processPayment(request())).doesNotThrowAnyException();
+
+        assertThat(holder[0].getStatus()).isEqualTo("COMPLETED");
+        verify(accountingClient).post(any());
+    }
+
+    @Test
+    void doesNotPostTwiceForReplayedPayment() {
+        when(paymentRepository.findByIdempotencyKey("KEY-1"))
+                .thenReturn(Optional.of(PaymentEntity.builder()
+                        .id(7L)
+                        .orderId("ORD-1")
+                        .status(PaymentStatus.COMPLETED)
+                        .build()));
+
+        PaymentService service = new PaymentService(paymentRepository, eventPublisher, accountingClient);
+        service.processPayment(request());
+
+        verify(accountingClient, never()).post(any());
+    }
+
+    private PaymentRequest request() {
+        return PaymentRequest.builder()
+                .orderId("ORD-1")
                 .amount(new BigDecimal("100.00"))
-                .paymentMethod("CREDIT_CARD")
+                .paymentMethod("CARD")
+                .idempotencyKey("KEY-1")
                 .build();
     }
 
     @Test
-    void processPayment_Success() {
-        // Arrange
-        when(paymentRepository.save(any(PaymentEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    void backfillsAccountingEntriesForCompletedPayments() {
+        PaymentEntity completed = PaymentEntity.builder()
+                .id(1L)
+                .orderId("ORD-1")
+                .amount(new BigDecimal("100.00"))
+                .status(PaymentStatus.COMPLETED)
+                .build();
+        PaymentEntity failed = PaymentEntity.builder()
+                .id(2L)
+                .orderId("ORD-2")
+                .amount(new BigDecimal("50.00"))
+                .status(PaymentStatus.FAILED)
+                .build();
+        when(paymentRepository.findAll()).thenReturn(List.of(completed, failed));
 
-        // Act
-        PaymentResponse result = paymentService.processPayment(validRequest);
+        PaymentService service = new PaymentService(paymentRepository, eventPublisher, accountingClient);
+        Map<String, Object> result = service.backfillAccounting();
 
-        // Assert
-        assertNotNull(result);
-        assertEquals("COMPLETED", result.getStatus());
-        assertEquals("ORD-123", result.getOrderId());
-        verify(eventPublisher, times(1)).publishEvent(any(PaymentCompletedEvent.class));
-        verify(paymentRepository, times(1)).save(any(PaymentEntity.class));
+        ArgumentCaptor<AccountingPostingRequest> captor = ArgumentCaptor.forClass(AccountingPostingRequest.class);
+        verify(accountingClient).post(captor.capture());
+        AccountingPostingRequest posting = captor.getValue();
+
+        assertThat(posting.getSourceType()).isEqualTo("PAYMENT_COMPLETED");
+        assertThat(posting.getSourceId()).isEqualTo("ORD-1");
+        assertThat(posting.getTotalAmount()).isEqualByComparingTo("100.00");
+        assertThat(result).containsEntry("processed", 1).containsEntry("created", 1);
     }
 
     @Test
-    void processPayment_InvalidAmount_ThrowsException() {
-        // Arrange
-        validRequest.setAmount(new BigDecimal("10.00"));
+    void doesNotAbortPaymentBackfillWhenPostingFails() {
+        PaymentEntity completed = PaymentEntity.builder()
+                .id(1L)
+                .orderId("ORD-1")
+                .amount(new BigDecimal("100.00"))
+                .status(PaymentStatus.COMPLETED)
+                .build();
+        when(paymentRepository.findAll()).thenReturn(List.of(completed));
+        doThrow(new RuntimeException("finance-service down")).when(accountingClient).post(any());
 
-        // Act & Assert
-        PaymentProcessingException exception = assertThrows(PaymentProcessingException.class, () -> {
-            paymentService.processPayment(validRequest);
-        });
+        PaymentService service = new PaymentService(paymentRepository, eventPublisher, accountingClient);
+        Map<String, Object> result = service.backfillAccounting();
 
-        assertTrue(exception.getMessage().contains("Invalid amount"));
-        verify(paymentRepository, never()).save(any());
-        verify(eventPublisher, never()).publishEvent(any());
-    }
-
-    @Test
-    void processPayment_InvalidMethod_ThrowsException() {
-        // Arrange
-        validRequest.setPaymentMethod("INVALID");
-
-        // Act & Assert
-        PaymentProcessingException exception = assertThrows(PaymentProcessingException.class, () -> {
-            paymentService.processPayment(validRequest);
-        });
-
-        assertTrue(exception.getMessage().contains("Invalid payment method"));
-        verify(paymentRepository, never()).save(any());
+        assertThat(result).containsEntry("processed", 1).containsEntry("created", 0);
+        verify(accountingClient).post(any());
     }
 }

@@ -1,6 +1,8 @@
 package com.erp.system.payment.service;
 
 import com.erp.common.event.PaymentCompletedEvent;
+import com.erp.system.payment.client.AccountingClient;
+import com.erp.system.payment.dto.AccountingPostingRequest;
 import com.erp.system.payment.dto.PaymentRequest;
 import com.erp.system.payment.dto.PaymentResponse;
 import com.erp.system.payment.entity.PaymentEntity;
@@ -14,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -23,6 +27,7 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final AccountingClient accountingClient;
 
     @Transactional
     public PaymentResponse processPayment(PaymentRequest request) {
@@ -53,7 +58,40 @@ public class PaymentService {
             log.info("Payment successful for order: {}", request.getOrderId());
         }
         PaymentEntity saved = paymentRepository.save(payment);
+        if ("COMPLETED".equals(status)) {
+            try {
+                accountingClient.post(AccountingPostingRequest.builder()
+                        .sourceType("PAYMENT_COMPLETED")
+                        .sourceId(saved.getOrderId())
+                        .totalAmount(saved.getAmount())
+                        .build());
+            } catch (Exception e) {
+                log.error("Failed to post accounting entry for payment (order {}, amount {}): {}",
+                        saved.getOrderId(), saved.getAmount(), e.getMessage());
+            }
+        }
         return toResponse(saved);
+    }
+
+    public Map<String, Object> backfillAccounting() {
+        List<PaymentEntity> completed = paymentRepository.findAll().stream()
+                .filter(p -> p.getStatus() == PaymentStatus.COMPLETED)
+                .toList();
+        int created = 0;
+        for (PaymentEntity p : completed) {
+            try {
+                accountingClient.post(AccountingPostingRequest.builder()
+                        .sourceType("PAYMENT_COMPLETED")
+                        .sourceId(p.getOrderId())
+                        .totalAmount(p.getAmount())
+                        .build());
+                created++;
+            } catch (Exception e) {
+                log.error("Failed to post accounting entry for payment (order {}, amount {}): {}",
+                        p.getOrderId(), p.getAmount(), e.getMessage());
+            }
+        }
+        return Map.of("processed", completed.size(), "created", created);
     }
 
     private void validateRequest(PaymentRequest request) {
